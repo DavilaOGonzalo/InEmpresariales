@@ -1,0 +1,10 @@
+﻿# Entorno virtual
+/env/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Django / local data
+*.sqlite3
+.env
