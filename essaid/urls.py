@@ -23,4 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('registro/', views.registro, name='registro'),
     path('registro/completado/', views.registro_completado, name='registro_completado'),
+    path('gestion/usuarios/nuevo/', views.crear_usuario_admin, name='crear_usuario_admin'),
+    path('gestion/usuarios/completado/', views.usuario_admin_completado, name='usuario_admin_completado'),
 ]
