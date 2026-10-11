@@ -27,6 +27,7 @@ class UsuarioManager(BaseUserManager):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("is_active", True)
+        extra_fields.setdefault("rol", "ADMINISTRADOR")
         if extra_fields.get("is_staff") is not True:
             raise ValueError("Un superusuario debe tener is_staff=True.")
         if extra_fields.get("is_superuser") is not True:
@@ -35,9 +36,17 @@ class UsuarioManager(BaseUserManager):
 
 
 class Usuario(AbstractUser):
+    class Rol(models.TextChoices):
+        PACIENTE = "PACIENTE", "Paciente"
+        PROFESIONAL_SALUD = "PROFESIONAL_SALUD", "Profesional de salud"
+        ADMINISTRADOR = "ADMINISTRADOR", "Administrador"
+
     """Cuenta de EssAid; puede autenticarse con correo o vincular Google."""
 
     username = None
+    rol = models.CharField(
+        "rol", max_length=20, choices=Rol.choices, default=Rol.PACIENTE
+    )
     email = models.EmailField("correo electrónico", unique=True)
 
     USERNAME_FIELD = "email"
