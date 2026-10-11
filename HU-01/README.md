@@ -1,4 +1,8 @@
-# EssAid
+# EssAid — HU-01
+
+## ¿Qué significa HU-01?
+
+HU-01 significa “Historia de Usuario 01”. En EssAid, esta historia trata sobre el registro de pacientes y la creación de cuentas con roles por parte de la administración.
 
 EssAid permite crear cuentas para pacientes y gestionar usuarios con distintos roles.
 
