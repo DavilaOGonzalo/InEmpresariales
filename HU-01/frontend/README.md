@@ -16,6 +16,17 @@ el backend sigue siendo la autoridad para permisos y validación.
 El contenedor autenticado debe pasar `puedeCrearAdministrador={true}` solo para
 superusuarios; el componente oculta ese rol por defecto.
 
+## Consulta y actualización administrativa
+
+- `GET /api/gestion/usuarios/` lista las cuentas seleccionables.
+- `GET /api/gestion/usuarios/<id>/` consulta los datos de una cuenta.
+- `PATCH /api/gestion/usuarios/<id>/` actualiza únicamente nombres, apellidos,
+  correo, rol y los datos del perfil paciente cuando el rol es `PACIENTE`.
+
+La contraseña, permisos Django, flags de superusuario y consentimientos no
+forman parte del contrato de actualización. Una cuenta que ya tiene perfil de
+paciente conserva el rol `PACIENTE` para no desvincular sus datos.
+
 ```powershell
 npm install
 npm run dev

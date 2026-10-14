@@ -86,7 +86,7 @@ WSGI_APPLICATION = 'essaid.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
-DB_ENGINE = os.getenv("ESSAID_DB_ENGINE", "django.db.backends.sqlite3")
+DB_ENGINE = os.getenv("ESSAID_DB_ENGINE", "django.db.backends.mysql")
 if DB_ENGINE == "django.db.backends.sqlite3":
     DATABASES = {
         "default": {
@@ -101,8 +101,11 @@ else:
             "NAME": os.getenv("ESSAID_DB_NAME", "essaid_db"),
             "USER": os.getenv("ESSAID_DB_USER", "root"),
             "PASSWORD": os.getenv("ESSAID_DB_PASSWORD", ""),
-            "HOST": os.getenv("ESSAID_DB_HOST", "127.0.0.1"),
+            "HOST": os.getenv("ESSAID_DB_HOST", "localhost"),
             "PORT": os.getenv("ESSAID_DB_PORT", "3306"),
+            "OPTIONS": {
+                "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
+            },
         }
     }
 
