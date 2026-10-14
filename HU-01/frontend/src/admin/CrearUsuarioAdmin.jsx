@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { crearUsuarioAdmin } from "./usuarioAdminApi";
 
-const ROLES = [
+export const ROLES = [
   { value: "PACIENTE", label: "Paciente" },
   { value: "PROFESIONAL_SALUD", label: "Profesional de salud" },
   { value: "ADMINISTRADOR", label: "Administrador" },

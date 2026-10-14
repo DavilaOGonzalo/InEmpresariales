@@ -12,6 +12,26 @@ body {
   margin: 0;
 }
 
+.admin-navigation {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 16px 0;
+}
+
+.admin-navigation button {
+  min-height: 38px;
+  border: 1px solid #397eb8;
+  background: transparent;
+  color: #397eb8;
+}
+
+.admin-navigation button.active,
+.admin-navigation button:hover {
+  background: #397eb8;
+  color: white;
+}
+
 .admin-page {
   min-height: 100vh;
   display: grid;
@@ -56,6 +76,25 @@ fieldset {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
+}
+
+.user-selector {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 12px;
+  margin-bottom: 22px;
+}
+
+.user-selector label {
+  grid-column: 1 / -1;
+}
+
+.user-selector select {
+  width: 100%;
+}
+
+.secondary-button {
+  background: #637b94;
 }
 
 label {
