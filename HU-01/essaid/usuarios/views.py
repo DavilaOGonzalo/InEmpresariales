@@ -8,13 +8,9 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.decorators.csrf import ensure_csrf_cookie
-from django.views.decorators.http import require_GET, require_http_methods
+from django.views.decorators.http import require_GET, require_POST
 
-from .forms import (
-    ActualizarUsuarioAdminForm,
-    CrearUsuarioAdminForm,
-    RegistroUsuarioForm,
-)
+from .forms import CrearUsuarioAdminForm, RegistroUsuarioForm
 from .models import Paciente, Usuario
 
 
@@ -46,29 +42,27 @@ def _guardar_usuario_admin(form):
     return usuario
 
 
-def _conflicto_registro_admin(form, usuario=None, paciente=None):
+def _conflicto_registro_admin(form):
     """Devuelve errores de unicidad detectados después de una carrera."""
     errores = {}
     email = form.cleaned_data.get("email")
-    cuentas = Usuario.objects.filter(email__iexact=email) if email else Usuario.objects.none()
-    if usuario is not None:
-        cuentas = cuentas.exclude(pk=usuario.pk)
-    if email and cuentas.exists():
+    if email and Usuario.objects.filter(email__iexact=email).exists():
         errores["email"] = "Ya existe una cuenta con ese correo."
 
     rol = form.cleaned_data.get("rol")
     tipo = form.cleaned_data.get("tipo_documento")
     numero = form.cleaned_data.get("numero_documento")
-    if rol == Usuario.Rol.PACIENTE and tipo and numero:
-        documentos = Paciente.objects.filter(
+    if (
+        rol == Usuario.Rol.PACIENTE
+        and tipo
+        and numero
+        and Paciente.objects.filter(
             tipo_documento=tipo, numero_documento__iexact=numero
+        ).exists()
+    ):
+        errores["numero_documento"] = (
+            "Ya existe un paciente con ese tipo y número de documento."
         )
-        if paciente is not None:
-            documentos = documentos.exclude(pk=paciente.pk)
-        if documentos.exists():
-            errores["numero_documento"] = (
-                "Ya existe un paciente con ese tipo y número de documento."
-            )
 
     return errores
 
@@ -94,135 +88,6 @@ def _datos_api(request):
     if not isinstance(datos, dict):
         return None, "El cuerpo de la solicitud debe ser un objeto JSON."
     return datos, None
-
-
-def _paciente_de_usuario(usuario):
-    try:
-        return usuario.perfil_paciente
-    except Paciente.DoesNotExist:
-        return None
-
-
-def _usuario_admin_payload(usuario):
-    paciente = _paciente_de_usuario(usuario)
-    return {
-        "id": usuario.pk,
-        "first_name": usuario.first_name,
-        "last_name": usuario.last_name,
-        "email": usuario.email,
-        "rol": usuario.rol,
-        "has_patient": paciente is not None,
-        "tipo_documento": paciente.tipo_documento if paciente else "",
-        "numero_documento": paciente.numero_documento if paciente else "",
-        "caracter_verificador": paciente.caracter_verificador if paciente else "",
-        "fecha_nacimiento": (
-            paciente.fecha_nacimiento.isoformat() if paciente else ""
-        ),
-        "celular": paciente.celular if paciente else "",
-    }
-
-
-def _requiere_sesion_administrativa(request):
-    if not request.user.is_authenticated or not request.user.is_staff:
-        return JsonResponse(
-            {"detail": "Se requiere una sesión administrativa.", "errors": {}},
-            status=403,
-        )
-    return None
-
-
-def _datos_actualizacion_usuario(usuario, paciente, datos):
-    campos_autorizados = {
-        "first_name",
-        "last_name",
-        "email",
-        "rol",
-        "tipo_documento",
-        "numero_documento",
-        "caracter_verificador",
-        "fecha_nacimiento",
-        "celular",
-    }
-    no_autorizados = sorted(set(datos) - campos_autorizados)
-    if no_autorizados:
-        return None, {
-            campo: ["Este campo no está autorizado para actualización."]
-            for campo in no_autorizados
-        }
-
-    actuales = _usuario_admin_payload(usuario)
-    actuales.pop("id")
-    actuales.pop("has_patient")
-    actuales.update(datos)
-
-    # Al cambiar un documento a CE, el carácter verificador anterior deja de
-    # ser válido. Si el cliente omite ese campo en un PATCH, se limpia para
-    # conservar la misma invariancia que exige Paciente.clean().
-    if (
-        actuales.get("rol") == Usuario.Rol.PACIENTE
-        and actuales.get("tipo_documento") == Paciente.TipoDocumento.CE
-        and "tipo_documento" in datos
-        and "caracter_verificador" not in datos
-    ):
-        actuales["caracter_verificador"] = ""
-
-    if (
-        actuales.get("rol") != Usuario.Rol.PACIENTE
-        and any(campo in datos for campo in ActualizarUsuarioAdminForm.CAMPOS_PACIENTE)
-    ):
-        return None, {
-            "__all__": [
-                "Los datos de paciente solo pueden modificarse para el rol PACIENTE."
-            ]
-        }
-
-    return actuales, None
-
-
-def _actualizar_usuario_admin(form):
-    with transaction.atomic():
-        usuario = form.instance
-        usuario.first_name = form.cleaned_data["first_name"]
-        usuario.last_name = form.cleaned_data["last_name"]
-        usuario.email = form.cleaned_data["email"]
-        usuario.rol = form.cleaned_data["rol"]
-        usuario.is_staff = usuario.is_superuser or (
-            usuario.rol == Usuario.Rol.ADMINISTRADOR
-        )
-        usuario.save(
-            update_fields=("first_name", "last_name", "email", "rol", "is_staff")
-        )
-
-        if usuario.rol == Usuario.Rol.PACIENTE:
-            paciente = form.paciente or Paciente(usuario=usuario)
-            paciente.tipo_documento = form.cleaned_data["tipo_documento"]
-            paciente.numero_documento = form.cleaned_data["numero_documento"]
-            paciente.caracter_verificador = form.cleaned_data[
-                "caracter_verificador"
-            ]
-            paciente.fecha_nacimiento = form.cleaned_data["fecha_nacimiento"]
-            paciente.celular = form.cleaned_data["celular"]
-            paciente.full_clean()
-            paciente.save()
-
-    return usuario
-
-
-def _listar_usuarios_admin():
-    usuarios = Usuario.objects.all().order_by("last_name", "first_name", "email")
-    return {
-        "users": [
-            {
-                "id": usuario.pk,
-                "first_name": usuario.first_name,
-                "last_name": usuario.last_name,
-                "email": usuario.email,
-                "rol": usuario.rol,
-                "has_patient": _paciente_de_usuario(usuario) is not None,
-            }
-            for usuario in usuarios
-        ]
-    }
 
 
 @require_GET
@@ -316,7 +181,7 @@ def crear_usuario_admin(request):
     return render(request, "usuarios/crear_usuario_admin.html", {"form": form})
 
 
-@require_http_methods(["GET", "POST"])
+@require_POST
 def crear_usuario_admin_api(request):
     """Registra una cuenta administrativa para el formulario React Admin.
 
@@ -324,12 +189,11 @@ def crear_usuario_admin_api(request):
     Los datos de paciente son obligatorios únicamente cuando ``rol`` es
     ``PACIENTE``. La respuesta nunca incluye la contraseña.
     """
-    respuesta_no_autorizada = _requiere_sesion_administrativa(request)
-    if respuesta_no_autorizada is not None:
-        return respuesta_no_autorizada
-
-    if request.method == "GET":
-        return JsonResponse(_listar_usuarios_admin())
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse(
+            {"detail": "Se requiere una sesión administrativa.", "errors": {}},
+            status=403,
+        )
 
     datos, error = _datos_api(request)
     if error:
@@ -380,80 +244,6 @@ def crear_usuario_admin_api(request):
             },
         },
         status=201,
-    )
-
-
-@require_http_methods(["GET", "PATCH"])
-def usuario_admin_detalle_api(request, usuario_id):
-    """Consulta o actualiza los campos autorizados de un usuario."""
-    respuesta_no_autorizada = _requiere_sesion_administrativa(request)
-    if respuesta_no_autorizada is not None:
-        return respuesta_no_autorizada
-
-    try:
-        usuario = Usuario.objects.get(pk=usuario_id)
-    except Usuario.DoesNotExist:
-        return JsonResponse(
-            {"detail": "Usuario no encontrado.", "errors": {}}, status=404
-        )
-
-    paciente = _paciente_de_usuario(usuario)
-    if request.method == "GET":
-        return JsonResponse({"user": _usuario_admin_payload(usuario)})
-
-    datos, error = _datos_api(request)
-    if error:
-        return JsonResponse(
-            {"detail": error, "errors": {"__all__": [error]}}, status=400
-        )
-
-    datos_completos, errores = _datos_actualizacion_usuario(
-        usuario, paciente, datos
-    )
-    if errores:
-        return JsonResponse(
-            {"detail": "Revisa los campos autorizados.", "errors": errores},
-            status=400,
-        )
-
-    form = ActualizarUsuarioAdminForm(
-        datos_completos,
-        instance=usuario,
-        paciente=paciente,
-        puede_crear_administrador=request.user.is_superuser,
-    )
-    if not form.is_valid():
-        return JsonResponse(
-            {
-                "detail": "Revisa los datos enviados.",
-                "errors": _errores_formulario(form),
-            },
-            status=400,
-        )
-
-    try:
-        usuario = _actualizar_usuario_admin(form)
-    except (IntegrityError, ValidationError):
-        conflictos = _conflicto_registro_admin(form, usuario, paciente)
-        if not conflictos:
-            conflictos = {
-                "__all__": [
-                    "No se pudo actualizar la cuenta porque ya existe un dato igual."
-                ]
-            }
-        return JsonResponse(
-            {
-                "detail": "No se pudo actualizar la cuenta.",
-                "errors": {campo: [mensaje] for campo, mensaje in conflictos.items()},
-            },
-            status=409,
-        )
-
-    return JsonResponse(
-        {
-            "message": f"La cuenta de {usuario.email} se actualizó correctamente.",
-            "user": _usuario_admin_payload(usuario),
-        }
     )
 
 

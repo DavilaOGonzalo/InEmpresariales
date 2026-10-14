@@ -20,16 +20,6 @@ Una respuesta exitosa devuelve `201` con `{message, user}`. Los errores de
 validación devuelven `400` con `{detail, errors}` y los mensajes agrupados por
 campo.
 
-## ADMIN-HU-02: consulta y actualización
-
-La administración consulta usuarios con `GET /api/gestion/usuarios/` y el
-detalle con `GET /api/gestion/usuarios/<id>/`. Los cambios se guardan mediante
-`PATCH` usando únicamente nombres, apellidos, correo, rol y los datos del
-perfil paciente cuando corresponda. La contraseña, permisos Django,
-superusuario y consentimientos no son editables desde este flujo. Para
-preservar el perfil existente, una cuenta con perfil de paciente conserva el
-rol `PACIENTE`.
-
 ## Base de datos
 
 El proyecto usa MariaDB por defecto: `localhost:3306`, base `essaid_db` y

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Usuario registrado | EssAid</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: grid; grid-template-rows: auto 1fr; background: #c6e3f8; color: #203a56; font: 16px/1.5 system-ui, sans-serif; }
+    header { padding: 18px max(24px, calc((100% - 760px)/2)); background: #f7fafce8; border-bottom: 1px solid #ffffffa8; }
+    .brand { color: #397eb8; font-size: 1.2rem; font-weight: 750; }
+    main { display: grid; place-items: center; padding: 32px 16px; }
+    .card { width: min(100%, 520px); padding: clamp(28px, 6vw, 48px); border: 1px solid #ffffffd1; border-radius: 18px; background: #f5f8faf2; box-shadow: 0 22px 58px #17395636; text-align: center; }
+    .check { width: 58px; height: 58px; display: grid; place-items: center; margin: 0 auto 18px; border-radius: 50%; background: #e2f5e9; color: #287346; font-size: 2rem; font-weight: 700; }
+    h1 { margin: 0; font-size: clamp(1.6rem, 4vw, 2rem); }
+    .message { margin: 12px 0 26px; color: #637b94; }
+    a { display: inline-block; padding: 11px 18px; border-radius: 9px; background: #397eb8; color: white; font-weight: 650; text-decoration: none; }
+    a:focus-visible { outline: 3px solid #203a56; outline-offset: 3px; }
+  </style>
+</head>
+<body>
+  <header><div class="brand">EssAid · Gestión</div></header>
+  <main>
+    <section class="card" aria-labelledby="titulo">
+      <div class="check" aria-hidden="true">✓</div>
+      <h1 id="titulo">Usuario registrado</h1>
+      {% for message in messages %}<p class="message" role="status">{{ message }}</p>{% empty %}<p class="message">La cuenta se registró correctamente.</p>{% endfor %}
+      <a href="{% url 'crear_usuario_admin' %}">Registrar otro usuario</a>
+    </section>
+  </main>
+</body>
+</html>
