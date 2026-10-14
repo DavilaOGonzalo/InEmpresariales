@@ -1,4 +1,5 @@
 export const CREAR_USUARIO_ADMIN_URL = "/api/gestion/usuarios/";
+export const CSRF_TOKEN_URL = "/api/gestion/usuarios/csrf/";
 
 function getCookie(name) {
   if (typeof document === "undefined") return "";
@@ -19,6 +20,12 @@ export async function crearUsuarioAdmin(
   datos,
   { fetchImpl = fetch } = {},
 ) {
+  await fetchImpl(CSRF_TOKEN_URL, {
+    method: "GET",
+    credentials: "same-origin",
+    headers: { Accept: "application/json" },
+  });
+
   const response = await fetchImpl(CREAR_USUARIO_ADMIN_URL, {
     method: "POST",
     credentials: "same-origin",

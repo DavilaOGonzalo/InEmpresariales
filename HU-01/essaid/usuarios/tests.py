@@ -23,6 +23,12 @@ class RegistroUsuarioAdminTests(TestCase):
             content_type="application/json",
         )
 
+    def test_endpoint_csrf_entrega_cookie_para_react(self):
+        respuesta = self.client.get(reverse("csrf_token_api"))
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertIn("csrftoken", respuesta.cookies)
+
     def datos_paciente(self, **cambios):
         datos = {
             "first_name": "Ana",

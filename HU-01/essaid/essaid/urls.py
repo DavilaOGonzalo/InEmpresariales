@@ -25,5 +25,6 @@ urlpatterns = [
     path('registro/completado/', views.registro_completado, name='registro_completado'),
     path('gestion/usuarios/nuevo/', views.crear_usuario_admin, name='crear_usuario_admin'),
     path('gestion/usuarios/completado/', views.usuario_admin_completado, name='usuario_admin_completado'),
+    path('api/gestion/usuarios/csrf/', views.csrf_token_api, name='csrf_token_api'),
     path('api/gestion/usuarios/', views.crear_usuario_admin_api, name='crear_usuario_admin_api'),
 ]

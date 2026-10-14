@@ -3,6 +3,8 @@
 El formulario `src/admin/CrearUsuarioAdmin.jsx` consume el contrato Django:
 
 - `POST /api/gestion/usuarios/`
+- El cliente solicita antes `GET /api/gestion/usuarios/csrf/` para obtener la
+  cookie CSRF de Django.
 - Entrada: `first_name`, `last_name`, `email`, `password1`, `password2`, `rol`.
 - Si `rol` es `PACIENTE`, también envía `tipo_documento`, `numero_documento`,
   `caracter_verificador` para DNI, `fecha_nacimiento` y `celular`.

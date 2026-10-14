@@ -7,7 +7,8 @@ from django.db import IntegrityError, transaction
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
-from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.http import require_GET, require_POST
 
 from .forms import CrearUsuarioAdminForm, RegistroUsuarioForm
 from .models import Paciente, Usuario
@@ -87,6 +88,13 @@ def _datos_api(request):
     if not isinstance(datos, dict):
         return None, "El cuerpo de la solicitud debe ser un objeto JSON."
     return datos, None
+
+
+@require_GET
+@ensure_csrf_cookie
+def csrf_token_api(request):
+    """Entrega la cookie CSRF para clientes React del mismo origen."""
+    return JsonResponse({"detail": "Token CSRF disponible."})
 
 
 def registro(request):
