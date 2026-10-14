@@ -118,7 +118,7 @@ class CrearUsuarioAdminForm(UserCreationForm):
             ]
 
     def clean_email(self):
-        email = self.cleaned_data["email"]
+        email = self.cleaned_data["email"].strip()
         if Usuario.objects.filter(email__iexact=email).exists():
             raise forms.ValidationError("Ya existe una cuenta con ese correo.")
         return email
@@ -127,8 +127,8 @@ class CrearUsuarioAdminForm(UserCreationForm):
         cleaned_data = super().clean()
         rol = cleaned_data.get("rol")
         tipo = cleaned_data.get("tipo_documento")
-        numero = cleaned_data.get("numero_documento", "").strip()
-        verificador = cleaned_data.get("caracter_verificador", "").strip()
+        numero = (cleaned_data.get("numero_documento") or "").strip()
+        verificador = (cleaned_data.get("caracter_verificador") or "").strip()
 
         if rol == Usuario.Rol.PACIENTE:
             for campo in (

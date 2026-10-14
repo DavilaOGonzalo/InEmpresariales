@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,7 +26,15 @@ SECRET_KEY = 'django-insecure-8$#(%s_2je0p0(sl$xgz6w%uszmj%dylt=jztcq@3ix5lp-=v@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        "ESSAID_CSRF_TRUSTED_ORIGINS",
+        "http://localhost:5173,http://127.0.0.1:5173",
+    ).split(",")
+    if origin.strip()
+]
 
 
 # Application definition
@@ -42,6 +51,7 @@ INSTALLED_APPS = [
 
 # Se define antes de crear las primeras migraciones.
 AUTH_USER_MODEL = 'usuarios.Usuario'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -76,16 +86,25 @@ WSGI_APPLICATION = 'essaid.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "essaid_db",
-        "USER": "root",
-        "PASSWORD": "",  # Usa aquí la contraseña de MariaDB, si configuraste una
-        "HOST": "127.0.0.1",
-        "PORT": "3306",
+DB_ENGINE = os.getenv("ESSAID_DB_ENGINE", "django.db.backends.sqlite3")
+if DB_ENGINE == "django.db.backends.sqlite3":
+    DATABASES = {
+        "default": {
+            "ENGINE": DB_ENGINE,
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": DB_ENGINE,
+            "NAME": os.getenv("ESSAID_DB_NAME", "essaid_db"),
+            "USER": os.getenv("ESSAID_DB_USER", "root"),
+            "PASSWORD": os.getenv("ESSAID_DB_PASSWORD", ""),
+            "HOST": os.getenv("ESSAID_DB_HOST", "127.0.0.1"),
+            "PORT": os.getenv("ESSAID_DB_PORT", "3306"),
+        }
+    }
 
 
 # Password validation

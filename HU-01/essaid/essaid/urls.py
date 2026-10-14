@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from PIntegrador.usuarios import views
+from usuarios import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,4 +25,5 @@ urlpatterns = [
     path('registro/completado/', views.registro_completado, name='registro_completado'),
     path('gestion/usuarios/nuevo/', views.crear_usuario_admin, name='crear_usuario_admin'),
     path('gestion/usuarios/completado/', views.usuario_admin_completado, name='usuario_admin_completado'),
+    path('api/gestion/usuarios/', views.crear_usuario_admin_api, name='crear_usuario_admin_api'),
 ]

@@ -2,7 +2,7 @@
 
 import django.db.models.deletion
 import django.utils.timezone
-import PIntegrador.usuarios.models
+import usuarios.models
 from django.conf import settings
 from django.db import migrations, models
 
@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'usuarios',
             },
             managers=[
-                ('objects', PIntegrador.usuarios.models.UsuarioManager()),
+                ('objects', usuarios.models.UsuarioManager()),
             ],
         ),
         migrations.CreateModel(

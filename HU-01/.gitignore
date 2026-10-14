@@ -8,3 +8,7 @@ __pycache__/
 # Django / local data
 *.sqlite3
 .env
+
+# React Admin
+frontend/node_modules/
+frontend/dist/
