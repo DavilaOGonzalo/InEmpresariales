@@ -27,4 +27,5 @@ urlpatterns = [
     path('gestion/usuarios/completado/', views.usuario_admin_completado, name='usuario_admin_completado'),
     path('api/gestion/usuarios/csrf/', views.csrf_token_api, name='csrf_token_api'),
     path('api/gestion/usuarios/', views.crear_usuario_admin_api, name='crear_usuario_admin_api'),
+    path('api/gestion/usuarios/<int:usuario_id>/', views.usuario_admin_detalle_api, name='usuario_admin_detalle_api'),
 ]
