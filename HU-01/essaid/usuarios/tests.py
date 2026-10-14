@@ -1,4 +1,5 @@
 import json
+from datetime import date
 
 from django.test import TestCase
 from django.urls import reverse
@@ -45,6 +46,24 @@ class RegistroUsuarioAdminTests(TestCase):
         }
         datos.update(cambios)
         return datos
+
+    def crear_paciente_existente(self, email="consultado@essaid.test"):
+        usuario = Usuario.objects.create_user(
+            email=email,
+            password="ClaveSegura2026!",
+            first_name="Nombre",
+            last_name="Original",
+            rol=Usuario.Rol.PACIENTE,
+        )
+        Paciente.objects.create(
+            usuario=usuario,
+            tipo_documento=Paciente.TipoDocumento.DNI,
+            numero_documento="44556677",
+            caracter_verificador="8",
+            fecha_nacimiento=date(1990, 1, 1),
+            celular="999111222",
+        )
+        return usuario
 
     def test_registro_valido_asigna_rol_y_guarda_password_hasheada(self):
         self.client.force_login(self.administrador)
@@ -129,3 +148,123 @@ class RegistroUsuarioAdminTests(TestCase):
         self.assertEqual(respuesta.status_code, 400)
         self.assertIn("numero_documento", respuesta.json()["errors"])
         self.assertFalse(Usuario.objects.filter(email="nuevo@essaid.test").exists())
+
+    def test_consulta_lista_y_detalle_de_usuario(self):
+        self.client.force_login(self.administrador)
+        usuario = self.crear_paciente_existente()
+
+        lista = self.client.get(self.url)
+        detalle = self.client.get(
+            reverse("usuario_admin_detalle_api", args=[usuario.pk])
+        )
+
+        self.assertEqual(lista.status_code, 200)
+        self.assertEqual(detalle.status_code, 200)
+        self.assertIn(
+            {"id": usuario.pk, "email": usuario.email, "rol": usuario.rol,
+             "first_name": "Nombre", "last_name": "Original", "has_patient": True},
+            lista.json()["users"],
+        )
+        self.assertEqual(detalle.json()["user"]["numero_documento"], "44556677")
+
+    def test_actualizacion_correcta_persiste_solo_campos_autorizados(self):
+        self.client.force_login(self.administrador)
+        usuario = self.crear_paciente_existente()
+        url = reverse("usuario_admin_detalle_api", args=[usuario.pk])
+
+        respuesta = self.client.patch(
+            url,
+            data=json.dumps(
+                {
+                    "first_name": "Nombre actualizado",
+                    "celular": "999333444",
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(respuesta.status_code, 200)
+        usuario.refresh_from_db()
+        usuario.perfil_paciente.refresh_from_db()
+        self.assertEqual(usuario.first_name, "Nombre actualizado")
+        self.assertEqual(usuario.perfil_paciente.celular, "999333444")
+        self.assertEqual(usuario.last_name, "Original")
+        self.assertTrue(usuario.check_password("ClaveSegura2026!"))
+
+    def test_actualizar_tipo_documento_a_ce_limpia_verificador_anterior(self):
+        self.client.force_login(self.administrador)
+        usuario = self.crear_paciente_existente()
+        url = reverse("usuario_admin_detalle_api", args=[usuario.pk])
+
+        respuesta = self.client.patch(
+            url,
+            data=json.dumps({"tipo_documento": Paciente.TipoDocumento.CE}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(respuesta.status_code, 200)
+        usuario.perfil_paciente.refresh_from_db()
+        self.assertEqual(usuario.perfil_paciente.tipo_documento, Paciente.TipoDocumento.CE)
+        self.assertEqual(usuario.perfil_paciente.caracter_verificador, "")
+
+    def test_usuario_inexistente_devuelve_404(self):
+        self.client.force_login(self.administrador)
+        url = reverse("usuario_admin_detalle_api", args=[999999])
+
+        respuesta = self.client.get(url)
+
+        self.assertEqual(respuesta.status_code, 404)
+        self.assertEqual(respuesta.json()["detail"], "Usuario no encontrado.")
+
+    def test_actualizacion_de_usuario_inexistente_devuelve_404(self):
+        self.client.force_login(self.administrador)
+        url = reverse("usuario_admin_detalle_api", args=[999999])
+
+        respuesta = self.client.patch(
+            url,
+            data=json.dumps({"first_name": "No existe"}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(respuesta.status_code, 404)
+        self.assertEqual(respuesta.json()["detail"], "Usuario no encontrado.")
+
+    def test_datos_invalidos_no_se_persisten(self):
+        self.client.force_login(self.administrador)
+        usuario = Usuario.objects.create_user(
+            email="profesional@essaid.test",
+            password="ClaveSegura2026!",
+            first_name="Profesional",
+            last_name="Original",
+            rol=Usuario.Rol.PROFESIONAL_SALUD,
+        )
+        url = reverse("usuario_admin_detalle_api", args=[usuario.pk])
+
+        respuesta = self.client.patch(
+            url,
+            data=json.dumps({"email": "correo-invalido"}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(respuesta.status_code, 400)
+        self.assertIn("email", respuesta.json()["errors"])
+        usuario.refresh_from_db()
+        self.assertEqual(usuario.email, "profesional@essaid.test")
+
+    def test_campo_no_autorizado_es_rechazado(self):
+        self.client.force_login(self.administrador)
+        usuario = Usuario.objects.create_user(
+            email="sin-password-edit@essaid.test",
+            password="ClaveSegura2026!",
+            rol=Usuario.Rol.PROFESIONAL_SALUD,
+        )
+        url = reverse("usuario_admin_detalle_api", args=[usuario.pk])
+
+        respuesta = self.client.patch(
+            url,
+            data=json.dumps({"password": "NuevaClave2026!"}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(respuesta.status_code, 400)
+        self.assertIn("password", respuesta.json()["errors"])
