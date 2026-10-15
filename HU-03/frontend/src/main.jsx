@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 
 import { CrearUsuarioAdmin } from "./admin/CrearUsuarioAdmin";
 import { EditarUsuarioAdmin } from "./admin/EditarUsuarioAdmin";
+import { EstadoUsuarioAdmin } from "./admin/EstadoUsuarioAdmin";
 import "./styles.css";
 
 function AdminApp() {
@@ -25,8 +26,21 @@ function AdminApp() {
         >
           Consultar y editar
         </button>
+        <button
+          type="button"
+          className={vista === "estado" ? "active" : ""}
+          onClick={() => setVista("estado")}
+        >
+          Estado de cuenta
+        </button>
       </nav>
-      {vista === "crear" ? <CrearUsuarioAdmin /> : <EditarUsuarioAdmin />}
+      {vista === "crear" ? (
+        <CrearUsuarioAdmin />
+      ) : vista === "editar" ? (
+        <EditarUsuarioAdmin />
+      ) : (
+        <EstadoUsuarioAdmin />
+      )}
     </>
   );
 }
