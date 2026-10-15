@@ -310,6 +310,13 @@ class ConsultaEstadoUsuarioAdminTests(TestCase):
         )
         self.url = reverse("usuario_admin_estado_api", args=[self.usuario.pk])
 
+    def cambiar_estado(self, is_active):
+        return self.client.patch(
+            self.url,
+            data=json.dumps({"is_active": is_active}),
+            content_type="application/json",
+        )
+
     def test_administrador_autorizado_puede_consultar_estado(self):
         self.client.force_login(self.administrador)
 
@@ -338,3 +345,51 @@ class ConsultaEstadoUsuarioAdminTests(TestCase):
 
         self.assertEqual(respuesta.status_code, 403)
         self.assertTrue(Usuario.objects.get(pk=self.usuario.pk).is_active)
+
+    def test_administrador_puede_desactivar_y_se_bloquea_autenticacion(self):
+        self.client.force_login(self.administrador)
+
+        respuesta = self.cambiar_estado(False)
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertFalse(respuesta.json()["user"]["is_active"])
+        self.usuario.refresh_from_db()
+        self.assertFalse(self.usuario.is_active)
+        self.assertIsNone(
+            authenticate(
+                email="consulta-cuenta@essaid.test",
+                password="ClaveTemporal2026!",
+            )
+        )
+
+    def test_administrador_puede_activar_y_restaura_autenticacion(self):
+        self.usuario.is_active = False
+        self.usuario.save(update_fields=("is_active",))
+        self.client.force_login(self.administrador)
+
+        respuesta = self.cambiar_estado(True)
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertTrue(respuesta.json()["user"]["is_active"])
+        self.usuario.refresh_from_db()
+        self.assertTrue(self.usuario.is_active)
+        self.assertEqual(
+            authenticate(
+                email="consulta-cuenta@essaid.test",
+                password="ClaveTemporal2026!",
+            ),
+            self.usuario,
+        )
+
+    def test_solo_is_active_booleano_puede_modificarse(self):
+        self.client.force_login(self.administrador)
+
+        respuesta = self.client.patch(
+            self.url,
+            data=json.dumps({"is_active": "false"}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(respuesta.status_code, 400)
+        self.usuario.refresh_from_db()
+        self.assertTrue(self.usuario.is_active)

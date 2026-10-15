@@ -469,7 +469,7 @@ def usuario_admin_detalle_api(request, usuario_id):
     )
 
 
-@require_GET
+@require_http_methods(["GET", "PATCH"])
 def usuario_admin_estado_api(request, usuario_id):
     """Consulta el estado de una cuenta para administradores autorizados."""
     respuesta_no_autorizada = _requiere_administrador_autorizado(request)
@@ -483,13 +483,39 @@ def usuario_admin_estado_api(request, usuario_id):
             {"detail": "Usuario no encontrado.", "errors": {}}, status=404
         )
 
+    if request.method == "GET":
+        return JsonResponse(
+            {
+                "user": {
+                    "id": usuario.pk,
+                    "email": usuario.email,
+                    "is_active": usuario.is_active,
+                }
+            }
+        )
+
+    datos, error = _datos_api(request)
+    if error:
+        return JsonResponse(
+            {"detail": error, "errors": {"__all__": [error]}}, status=400
+        )
+    if set(datos) != {"is_active"} or type(datos["is_active"]) is not bool:
+        mensaje = "Envía únicamente el campo is_active con un valor booleano."
+        return JsonResponse(
+            {"detail": mensaje, "errors": {"is_active": [mensaje]}}, status=400
+        )
+
+    usuario.is_active = datos["is_active"]
+    usuario.save(update_fields=("is_active",))
+    estado = "activada" if usuario.is_active else "desactivada"
     return JsonResponse(
         {
+            "message": f"La cuenta de {usuario.email} fue {estado} correctamente.",
             "user": {
                 "id": usuario.pk,
                 "email": usuario.email,
                 "is_active": usuario.is_active,
-            }
+            },
         }
     )
 
