@@ -97,6 +97,16 @@ fieldset {
   background: #637b94;
 }
 
+.account-state {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+
+.account-state p {
+  margin: 0;
+}
+
 label {
   display: grid;
   gap: 6px;

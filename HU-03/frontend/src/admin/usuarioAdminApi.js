@@ -107,3 +107,25 @@ export async function obtenerEstadoUsuarioAdmin(
   });
   return readResponse(response, "No se pudo consultar el estado de la cuenta.");
 }
+
+export async function cambiarEstadoUsuarioAdmin(
+  id,
+  isActive,
+  { fetchImpl = fetch } = {},
+) {
+  await ensureCsrf(fetchImpl);
+  const response = await fetchImpl(
+    `${DETALLE_USUARIO_ADMIN_URL(id)}estado/`,
+    {
+      method: "PATCH",
+      credentials: "same-origin",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie("csrftoken"),
+      },
+      body: JSON.stringify({ is_active: isActive }),
+    },
+  );
+  return readResponse(response, "No se pudo cambiar el estado de la cuenta.");
+}

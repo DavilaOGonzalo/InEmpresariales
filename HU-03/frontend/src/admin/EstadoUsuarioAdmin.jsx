@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import {
+  cambiarEstadoUsuarioAdmin,
   listarUsuariosAdmin,
   obtenerEstadoUsuarioAdmin,
 } from "./usuarioAdminApi";
@@ -12,6 +13,7 @@ export function EstadoUsuarioAdmin() {
   const [status, setStatus] = useState({ type: "", message: "" });
   const [loading, setLoading] = useState(true);
   const [loadingState, setLoadingState] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     let activo = true;
@@ -56,6 +58,24 @@ export function EstadoUsuarioAdmin() {
     };
   }, [selectedId]);
 
+  const cambiarEstado = async () => {
+    if (!estadoCuenta) return;
+    setSaving(true);
+    setStatus({ type: "", message: "" });
+    try {
+      const response = await cambiarEstadoUsuarioAdmin(
+        estadoCuenta.id,
+        !estadoCuenta.is_active,
+      );
+      setEstadoCuenta(response.user);
+      setStatus({ type: "success", message: response.message });
+    } catch (error) {
+      setStatus({ type: "error", message: error.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <main className="admin-page">
       <section className="admin-card" aria-labelledby="titulo-estado">
@@ -77,7 +97,7 @@ export function EstadoUsuarioAdmin() {
             id="usuario-estado"
             value={selectedId}
             onChange={(event) => setSelectedId(event.target.value)}
-            disabled={loading || loadingState}
+            disabled={loading || loadingState || saving}
           >
             <option value="">
               {loading ? "Cargando usuarios…" : "Selecciona un usuario"}
@@ -92,10 +112,21 @@ export function EstadoUsuarioAdmin() {
 
         {loadingState && <p role="status">Consultando estado…</p>}
         {estadoCuenta && (
-          <p aria-live="polite">
-            Estado actual:{" "}
-            <strong>{estadoCuenta.is_active ? "Activa" : "Inactiva"}</strong>
-          </p>
+          <div className="account-state" aria-live="polite">
+            <p>
+              Estado actual:{" "}
+              <strong>
+                {estadoCuenta.is_active ? "Activa" : "Inactiva"}
+              </strong>
+            </p>
+            <button type="button" onClick={cambiarEstado} disabled={saving}>
+              {saving
+                ? "Guardando…"
+                : estadoCuenta.is_active
+                  ? "Desactivar cuenta"
+                  : "Activar cuenta"}
+            </button>
+          </div>
         )}
       </section>
     </main>
