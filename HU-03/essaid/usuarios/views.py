@@ -131,6 +131,18 @@ def _requiere_sesion_administrativa(request):
     return None
 
 
+def _requiere_administrador_autorizado(request):
+    usuario = request.user
+    if not usuario.is_authenticated or not usuario.is_staff or not (
+        usuario.is_superuser or usuario.rol == Usuario.Rol.ADMINISTRADOR
+    ):
+        return JsonResponse(
+            {"detail": "Se requiere un administrador autorizado.", "errors": {}},
+            status=403,
+        )
+    return None
+
+
 def _datos_actualizacion_usuario(usuario, paciente, datos):
     campos_autorizados = {
         "first_name",
@@ -453,6 +465,31 @@ def usuario_admin_detalle_api(request, usuario_id):
         {
             "message": f"La cuenta de {usuario.email} se actualizó correctamente.",
             "user": _usuario_admin_payload(usuario),
+        }
+    )
+
+
+@require_GET
+def usuario_admin_estado_api(request, usuario_id):
+    """Consulta el estado de una cuenta para administradores autorizados."""
+    respuesta_no_autorizada = _requiere_administrador_autorizado(request)
+    if respuesta_no_autorizada is not None:
+        return respuesta_no_autorizada
+
+    try:
+        usuario = Usuario.objects.get(pk=usuario_id)
+    except Usuario.DoesNotExist:
+        return JsonResponse(
+            {"detail": "Usuario no encontrado.", "errors": {}}, status=404
+        )
+
+    return JsonResponse(
+        {
+            "user": {
+                "id": usuario.pk,
+                "email": usuario.email,
+                "is_active": usuario.is_active,
+            }
         }
     )
 

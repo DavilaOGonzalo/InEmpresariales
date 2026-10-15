@@ -296,3 +296,45 @@ class UsuarioAdminEstadoCuentaTests(TestCase):
         respuesta = self.client.get("/admin/usuarios/usuario/")
 
         self.assertEqual(respuesta.status_code, 403)
+
+
+class ConsultaEstadoUsuarioAdminTests(TestCase):
+    def setUp(self):
+        self.administrador = Usuario.objects.create_superuser(
+            email="consulta-admin@essaid.test",
+            password="ClaveTemporal2026!",
+        )
+        self.usuario = Usuario.objects.create_user(
+            email="consulta-cuenta@essaid.test",
+            password="ClaveTemporal2026!",
+        )
+        self.url = reverse("usuario_admin_estado_api", args=[self.usuario.pk])
+
+    def test_administrador_autorizado_puede_consultar_estado(self):
+        self.client.force_login(self.administrador)
+
+        respuesta = self.client.get(self.url)
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertEqual(
+            respuesta.json()["user"],
+            {
+                "id": self.usuario.pk,
+                "email": self.usuario.email,
+                "is_active": True,
+            },
+        )
+
+    def test_staff_sin_rol_administrador_no_puede_consultar_estado(self):
+        usuario_staff = Usuario.objects.create_user(
+            email="consulta-staff@essaid.test",
+            password="ClaveTemporal2026!",
+            is_staff=True,
+            rol=Usuario.Rol.PACIENTE,
+        )
+        self.client.force_login(usuario_staff)
+
+        respuesta = self.client.get(self.url)
+
+        self.assertEqual(respuesta.status_code, 403)
+        self.assertTrue(Usuario.objects.get(pk=self.usuario.pk).is_active)
