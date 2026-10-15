@@ -27,6 +27,19 @@ La contraseña, permisos Django, flags de superusuario y consentimientos no
 forman parte del contrato de actualización. Una cuenta que ya tiene perfil de
 paciente conserva el rol `PACIENTE` para no desvincular sus datos.
 
+## ADMIN-HU-03: estado de cuenta
+
+La vista "Estado de cuenta" lista usuarios y consulta su estado con
+`GET /api/gestion/usuarios/<id>/estado/`. Permite alternarlo mediante
+`PATCH /api/gestion/usuarios/<id>/estado/` con `{"is_active": true}` o
+`{"is_active": false}`. El backend solo autoriza superusuarios o usuarios staff
+con rol `ADMINISTRADOR`; la interfaz no reemplaza esta validación.
+
+Si el login está alojado en Spring Boot, Django no puede impedir por sí solo que
+ese backend emita credenciales: Spring Boot debe consultar el mismo campo
+`is_active` al autenticar y renovar tokens, y rechazar cuentas inactivas antes
+de emitirlos. Esta copia no incluye el backend Spring Boot.
+
 ```powershell
 npm install
 npm run dev
