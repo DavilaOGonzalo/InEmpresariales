@@ -1,0 +1,273 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crear cuenta | EssAid</title>
+  <style>
+    :root { --ink: #203a56; --muted: #637b94; --blue: #397eb8; --line: #d7e3ee; --error: #a83232; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #c6e3f8;
+      color: var(--ink);
+      font: 16px/1.5 system-ui, sans-serif;
+    }
+    header { padding: 20px max(24px, calc((100% - 980px)/2)); background: #f7fafce8; border-bottom: 1px solid #ffffffa8; }
+    .brand { color: var(--blue); font-size: 1.25rem; font-weight: 750; letter-spacing: .02em; }
+    main { display: grid; min-height: calc(100vh - 69px); place-items: center; padding: 28px 16px; }
+    .card { width: min(100%, 520px); padding: clamp(24px, 6vw, 46px); background: #f5f8faf2; border: 1px solid #ffffffd1; border-radius: 18px; box-shadow: 0 22px 58px #17395652; backdrop-filter: blur(8px); }
+    .eyebrow { margin: 0 0 9px; color: var(--blue); font-size: .78rem; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(1.8rem, 5vw, 2.25rem); line-height: 1.15; }
+    .intro { margin: 12px 0 28px; color: var(--muted); }
+    .field { margin-top: 20px; }
+    .field-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 7px; }
+    label { display: block; font-size: .92rem; font-weight: 650; }
+    .field-help { position: relative; display: inline-flex; flex: 0 0 auto; }
+    .help-trigger { min-height: 34px; padding: 4px 9px; border: 1px solid #a9c7e0; border-radius: 7px; background: #ffffffa8; color: var(--blue); font: 650 .78rem/1.2 system-ui, sans-serif; cursor: pointer; }
+    .help-trigger { white-space: nowrap; }
+    .help-popover { position: absolute; z-index: 2; top: calc(100% + 8px); right: 0; width: min(280px, 75vw); padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: #fff; box-shadow: 0 10px 24px #17395626; color: var(--muted); font-size: .84rem; font-weight: 400; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity .16s ease, transform .16s ease, visibility .16s; }
+    .field-help:hover .help-popover, .field-help.is-open .help-popover { opacity: 1; visibility: visible; transform: translateY(0); }
+    .field-help.is-closed .help-popover { opacity: 0; visibility: hidden; transform: translateY(-4px); }
+    input, select { width: 100%; min-height: 48px; padding: 11px 13px; border: 1px solid #c6d6e5; border-radius: 9px; background: #fffefa; color: var(--ink); font: inherit; }
+    input:focus, select:focus { outline: 3px solid #397eb82b; border-color: var(--blue); }
+    .actions { display: flex; justify-content: space-between; gap: 12px; margin-top: 28px; }
+    .action { min-height: 44px; padding: 10px 18px; border: 1px solid var(--blue); border-radius: 9px; background: var(--blue); color: white; font: 650 .95rem system-ui, sans-serif; cursor: pointer; }
+    .action.secondary { background: transparent; color: var(--blue); }
+    .consent-field { display: grid; grid-template-columns: 20px 1fr; align-items: start; column-gap: 10px; }
+    .consent-field input { width: 18px; min-height: 18px; margin: 3px 0 0; accent-color: var(--blue); }
+    .consent-field label { font-weight: 500; }
+    .consent-field .errorlist { grid-column: 1 / -1; }
+    [hidden] { display: none !important; }
+    .errorlist, .error { margin: 6px 0 0; padding: 0; color: var(--error); font-size: .88rem; list-style: none; }
+    @media (max-width: 560px) { body { background-attachment: scroll; } }
+  </style>
+</head>
+<body>
+  <header><div class="brand">EssAid</div></header>
+  <main>
+    <section class="card" aria-labelledby="titulo">
+      <p class="eyebrow" id="etapa-label">Etapa {{ etapa_actual }}</p>
+      <h1 id="titulo">{% if etapa_actual == 2 %}Documento de identidad{% elif etapa_actual == 3 %}Fecha de nacimiento{% elif etapa_actual == 4 %}Número de celular{% elif etapa_actual == 5 %}Términos y autorizaciones{% else %}Crea tu cuenta de EssAid{% endif %}</h1>
+
+      {% if form.non_field_errors %}<div class="error">{{ form.non_field_errors }}</div>{% endif %}
+      <form method="post" novalidate id="registro-form">
+        {% csrf_token %}
+        <div id="etapa-1" {% if etapa_actual != 1 %}hidden{% endif %}>
+          {% for field in form %}
+            {% if field.name == 'email' or field.name == 'password1' or field.name == 'password2' %}
+            <div class="field">
+              <div class="field-heading">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {% if field.name == 'email' %}
+                  <span class="field-help"><button type="button" class="help-trigger" aria-expanded="false">Ver ejemplo</button><span class="help-popover">Usa una cuenta que termine en <strong>@gmail.com</strong> o <strong>@tecsup.edu.pe</strong>. Ejemplo: nombre@gmail.com.</span></span>
+                {% elif field.name == 'password1' %}
+                  <span class="field-help"><button type="button" class="help-trigger" aria-expanded="false">Ver ejemplo</button><span class="help-popover">Crea una clave de 8 caracteres o más, que combine letras y números. Ejemplo: <strong>MarAzul2026</strong>.</span></span>
+                {% elif field.name == 'password2' %}
+                  <span class="field-help"><button type="button" class="help-trigger" aria-expanded="false">Ver ejemplo</button><span class="help-popover">Vuelve a escribir exactamente la misma contraseña que ingresaste arriba.</span></span>
+                {% endif %}
+              </div>
+              {{ field }}
+              {{ field.errors }}
+            </div>
+            {% endif %}
+          {% endfor %}
+          <div class="actions"><span></span><button class="action" type="button" id="continuar-etapa-1">Continuar</button></div>
+        </div>
+        <div id="etapa-2" {% if etapa_actual != 2 %}hidden{% endif %}>
+          <div class="field">
+            <label for="{{ form.tipo_documento.id_for_label }}">{{ form.tipo_documento.label }}</label>
+            {{ form.tipo_documento }}
+            {{ form.tipo_documento.errors }}
+          </div>
+          <div class="field">
+            <label for="{{ form.numero_documento.id_for_label }}">{{ form.numero_documento.label }}</label>
+            {{ form.numero_documento }}
+            {{ form.numero_documento.errors }}
+          </div>
+          <div class="field" id="campo-verificador">
+            <label for="{{ form.caracter_verificador.id_for_label }}">{{ form.caracter_verificador.label }}</label>
+            {{ form.caracter_verificador }}
+            {{ form.caracter_verificador.errors }}
+          </div>
+          <div class="actions">
+            <button class="action secondary" type="button" id="volver-etapa-1">Volver</button>
+            <button class="action" type="button" id="continuar-etapa-2">Continuar</button>
+          </div>
+        </div>
+        <div id="etapa-3" {% if etapa_actual != 3 %}hidden{% endif %}>
+          <div class="field">
+            <label for="{{ form.fecha_nacimiento.id_for_label }}">{{ form.fecha_nacimiento.label }}</label>
+            {{ form.fecha_nacimiento }}
+            {{ form.fecha_nacimiento.errors }}
+          </div>
+          <div class="actions">
+            <button class="action secondary" type="button" id="volver-etapa-2">Volver</button>
+            <button class="action" type="button" id="continuar-etapa-3">Continuar</button>
+          </div>
+        </div>
+        <div id="etapa-4" {% if etapa_actual != 4 %}hidden{% endif %}>
+          <div class="field">
+            <label for="{{ form.celular.id_for_label }}">{{ form.celular.label }}</label>
+            {{ form.celular }}
+            {{ form.celular.errors }}
+          </div>
+          <div class="actions">
+            <button class="action secondary" type="button" id="volver-etapa-3">Volver</button>
+            <button class="action" type="button" id="continuar-etapa-4">Continuar</button>
+          </div>
+        </div>
+        <div id="etapa-5" {% if etapa_actual != 5 %}hidden{% endif %}>
+          <p class="intro">Confirma estas autorizaciones para finalizar el registro.</p>
+          <div class="field consent-field">
+            {{ form.terminos_aceptados }}
+            <label for="{{ form.terminos_aceptados.id_for_label }}">{{ form.terminos_aceptados.label }}</label>
+            {{ form.terminos_aceptados.errors }}
+          </div>
+          <div class="field consent-field">
+            {{ form.tratamiento_datos_autorizado }}
+            <label for="{{ form.tratamiento_datos_autorizado.id_for_label }}">{{ form.tratamiento_datos_autorizado.label }}</label>
+            {{ form.tratamiento_datos_autorizado.errors }}
+          </div>
+          <div class="actions">
+            <button class="action secondary" type="button" id="volver-etapa-4">Volver</button>
+            <button class="action" type="submit" id="crear-cuenta">Crear cuenta</button>
+          </div>
+        </div>
+      </form>
+    </section>
+  </main>
+  <script>
+    document.querySelectorAll(".field-help").forEach((help) => {
+      const trigger = help.querySelector(".help-trigger");
+      trigger.addEventListener("click", () => {
+        const isOpen = help.classList.contains("is-open");
+        help.classList.toggle("is-open", !isOpen);
+        help.classList.toggle("is-closed", isOpen);
+        trigger.setAttribute("aria-expanded", String(!isOpen));
+      });
+      help.addEventListener("mouseleave", () => help.classList.remove("is-closed"));
+    });
+    const etapa1 = document.getElementById("etapa-1");
+    const etapa2 = document.getElementById("etapa-2");
+    const etapa3 = document.getElementById("etapa-3");
+    const etapa4 = document.getElementById("etapa-4");
+    const etapa5 = document.getElementById("etapa-5");
+    const etapaLabel = document.getElementById("etapa-label");
+    const titulo = document.getElementById("titulo");
+    const emailRegistro = document.getElementById("id_email");
+    const dominiosPermitidos = ["gmail.com", "tecsup.edu.pe"];
+    const validarDominioCorreo = () => {
+      if (!emailRegistro.value.trim() || !emailRegistro.checkValidity()) return emailRegistro.checkValidity();
+      const dominio = emailRegistro.value.trim().toLowerCase().split("@").pop();
+      const dominioPermitido = dominiosPermitidos.includes(dominio);
+      emailRegistro.setCustomValidity(dominioPermitido ? "" : "Usa un correo que termine en @gmail.com o @tecsup.edu.pe.");
+      return dominioPermitido;
+    };
+    emailRegistro.addEventListener("blur", () => {
+      if (emailRegistro.value.trim() && !validarDominioCorreo()) emailRegistro.reportValidity();
+    });
+    emailRegistro.addEventListener("input", () => emailRegistro.setCustomValidity(""));
+    document.getElementById("continuar-etapa-1").addEventListener("click", () => {
+      const password = document.getElementById("id_password1");
+      const confirmation = document.getElementById("id_password2");
+      if (!emailRegistro.reportValidity() || !validarDominioCorreo()) {
+        emailRegistro.reportValidity();
+        return;
+      }
+      if (!password.reportValidity() || !confirmation.reportValidity()) return;
+      if (password.value !== confirmation.value) {
+        confirmation.setCustomValidity("Las contraseñas no coinciden.");
+        confirmation.reportValidity();
+        confirmation.addEventListener("input", () => confirmation.setCustomValidity(""), { once: true });
+        return;
+      }
+      etapa1.hidden = true;
+      etapa2.hidden = false;
+      etapa3.hidden = true;
+      etapa4.hidden = true;
+      etapa5.hidden = true;
+      etapaLabel.textContent = "Etapa 2";
+      titulo.textContent = "Documento de identidad";
+    });
+    document.getElementById("volver-etapa-1").addEventListener("click", () => {
+      etapa2.hidden = true;
+      etapa3.hidden = true;
+      etapa4.hidden = true;
+      etapa5.hidden = true;
+      etapa1.hidden = false;
+      etapaLabel.textContent = "Etapa 1";
+      titulo.textContent = "Crea tu cuenta de EssAid";
+    });
+    document.getElementById("continuar-etapa-2").addEventListener("click", () => {
+      const tipo = document.getElementById("id_tipo_documento");
+      const numero = document.getElementById("id_numero_documento");
+      const verificador = document.getElementById("id_caracter_verificador");
+      if (!tipo.reportValidity() || !numero.reportValidity()) return;
+      if (tipo.value === "DNI" && !verificador.reportValidity()) return;
+      etapa2.hidden = true;
+      etapa3.hidden = false;
+      etapaLabel.textContent = "Etapa 3";
+      titulo.textContent = "Fecha de nacimiento";
+    });
+    document.getElementById("volver-etapa-2").addEventListener("click", () => {
+      etapa3.hidden = true;
+      etapa4.hidden = true;
+      etapa2.hidden = false;
+      etapaLabel.textContent = "Etapa 2";
+      titulo.textContent = "Documento de identidad";
+    });
+    document.getElementById("continuar-etapa-3").addEventListener("click", () => {
+      const fechaNacimiento = document.getElementById("id_fecha_nacimiento");
+      if (!fechaNacimiento.reportValidity()) return;
+      etapa3.hidden = true;
+      etapa4.hidden = false;
+      etapa5.hidden = true;
+      etapaLabel.textContent = "Etapa 4";
+      titulo.textContent = "Número de celular";
+    });
+    document.getElementById("volver-etapa-3").addEventListener("click", () => {
+      etapa4.hidden = true;
+      etapa3.hidden = false;
+      etapa5.hidden = true;
+      etapaLabel.textContent = "Etapa 3";
+      titulo.textContent = "Fecha de nacimiento";
+    });
+    document.getElementById("continuar-etapa-4").addEventListener("click", () => {
+      const celular = document.getElementById("id_celular");
+      if (!celular.reportValidity()) return;
+      etapa4.hidden = true;
+      etapa5.hidden = false;
+      etapaLabel.textContent = "Etapa 5";
+      titulo.textContent = "Términos y autorizaciones";
+    });
+    document.getElementById("volver-etapa-4").addEventListener("click", () => {
+      etapa5.hidden = true;
+      etapa4.hidden = false;
+      etapaLabel.textContent = "Etapa 4";
+      titulo.textContent = "Número de celular";
+    });
+    const tipoDocumento = document.getElementById("id_tipo_documento");
+    const campoVerificador = document.getElementById("campo-verificador");
+    const actualizarVerificador = () => {
+      const esDni = tipoDocumento.value === "DNI";
+      campoVerificador.hidden = !esDni;
+      document.getElementById("id_caracter_verificador").required = esDni;
+      if (!esDni) document.getElementById("id_caracter_verificador").value = "";
+    };
+    tipoDocumento.addEventListener("change", actualizarVerificador);
+    actualizarVerificador();
+    document.getElementById("registro-form").addEventListener("submit", (event) => {
+      if (etapa5.hidden) {
+        event.preventDefault();
+        return;
+      }
+      const terminos = document.getElementById("id_terminos_aceptados");
+      const tratamiento = document.getElementById("id_tratamiento_datos_autorizado");
+      if (!terminos.reportValidity() || !tratamiento.reportValidity()) event.preventDefault();
+    });
+  </script>
+</body>
+</html>
