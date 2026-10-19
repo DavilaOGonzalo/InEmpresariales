@@ -105,3 +105,21 @@ con `set_password` y no expone el campo `password` en las respuestas.
 
 La API DRF convive con los endpoints administrativos anteriores bajo
 `/api/gestion/usuarios/`, que siguen siendo consumidos por el frontend React.
+
+## Frontend React de la Semana 9
+
+El frontend se encuentra en `frontend` y usa React con Vite. La vista inicial
+`Laboratorio React` demuestra JSX, expresiones, listas con `map()` y `key`,
+renderizado condicional, datos anidados de usuarios/pacientes y estilos CSS.
+Las pantallas administrativas existentes siguen disponibles desde la
+navegación superior.
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+Para verificar la entrega ejecuta `npm run lint` y `npm run build`. El
+repositorio actualizado es:
+<https://github.com/DavilaOGonzalo/InEmpresariales>.

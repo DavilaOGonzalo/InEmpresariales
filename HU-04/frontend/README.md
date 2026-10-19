@@ -1,4 +1,43 @@
-# Formulario React de gestión
+# EssAid · Laboratorio React y gestión administrativa
+
+La carpeta `frontend` contiene el proyecto React creado con Vite para el
+laboratorio de la Semana 9. La vista inicial **Laboratorio React** trabaja con
+arreglos escritos a mano para demostrar JSX, expresiones, `map()`, `key`,
+renderizado condicional, listas anidadas y estilos. Presenta las entidades
+`Usuario` y `Paciente`; las consultas anidadas son datos de demostración y no
+se consultan todavía en la API, tal como solicita el laboratorio.
+
+También se conservan las vistas administrativas de EssAid: registro,
+consulta/edición y estado de cuenta. Esas vistas sí consumen los endpoints
+administrativos de Django descritos más abajo.
+
+## Repositorio
+
+https://github.com/DavilaOGonzalo/InEmpresariales
+
+## Instalación y ejecución
+
+```powershell
+cd HU-04/frontend
+node -v
+npm -v
+npm install
+npm run dev
+```
+
+Abre <http://localhost:5173/> en el navegador. Para validar la entrega:
+
+```powershell
+npm run lint
+npm run build
+```
+
+La aplicación se ejecuta como una SPA: `index.html` monta `src/main.jsx`,
+`main.jsx` monta `App.jsx`, y `App.jsx` alterna la vista del laboratorio con
+las pantallas administrativas. La interfaz pedagógica usa datos manuales para
+mostrar `Usuario` y `Paciente`, una relación de consultas anidadas, el estado
+`is_active`, una lista vacía y un importe calculado con JavaScript. La próxima
+etapa consiste en reemplazar esos arreglos por llamadas a la API REST.
 
 El formulario `src/admin/CrearUsuarioAdmin.jsx` consume el contrato Django:
 

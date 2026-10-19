@@ -1,12 +1,7 @@
 import { useState } from "react";
 
 import { crearUsuarioAdmin } from "./usuarioAdminApi";
-
-export const ROLES = [
-  { value: "PACIENTE", label: "Paciente" },
-  { value: "PROFESIONAL_SALUD", label: "Profesional de salud" },
-  { value: "ADMINISTRADOR", label: "Administrador" },
-];
+import { ROLES } from "./roles";
 
 const EMPTY_FORM = {
   first_name: "",

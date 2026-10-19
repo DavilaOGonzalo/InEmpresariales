@@ -5,7 +5,7 @@ import {
   listarUsuariosAdmin,
   obtenerUsuarioAdmin,
 } from "./usuarioAdminApi";
-import { ROLES } from "./CrearUsuarioAdmin";
+import { ROLES } from "./roles";
 
 const EMPTY_FORM = {
   first_name: "",
