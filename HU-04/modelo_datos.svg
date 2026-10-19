@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="610" viewBox="0 0 1120 610" role="img" aria-labelledby="title desc">
+  <title id="title">Modelo de datos de EssAid</title>
+  <desc id="desc">Diagrama de las tablas Usuario y Paciente. Un usuario puede tener cero o un perfil de paciente; cada paciente pertenece a un usuario.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f4f7fb; }
+      .card { fill: #fff; stroke: #cbd5e1; stroke-width: 2; }
+      .head { fill: #163b68; }
+      .headText { fill: #fff; font: 700 22px Arial, sans-serif; }
+      .field { fill: #243247; font: 16px Arial, sans-serif; }
+      .key { fill: #0b6b65; font-weight: 700; }
+      .title { fill: #14243a; font: 700 30px Arial, sans-serif; }
+      .sub { fill: #52647a; font: 16px Arial, sans-serif; }
+      .rel { stroke: #35658f; stroke-width: 3; fill: none; }
+      .label { fill: #284b70; font: 700 16px Arial, sans-serif; }
+      .note { fill: #52647a; font: 14px Arial, sans-serif; }
+      .badge { fill: #e3f2ef; stroke: #9dcfc5; stroke-width: 1; }
+      .badgeText { fill: #155e57; font: 700 13px Arial, sans-serif; }
+    </style>
+  </defs>
+  <rect class="bg" width="1120" height="610" rx="20"/>
+  <text class="title" x="560" y="58" text-anchor="middle">Modelo de datos</text>
+  <text class="sub" x="560" y="86" text-anchor="middle">Modelos propios definidos en Django</text>
+
+  <!-- Usuario table -->
+  <rect class="card" x="90" y="145" width="390" height="355" rx="12"/>
+  <path class="head" d="M102 145h366a12 12 0 0 1 12 12v48H90v-48a12 12 0 0 1 12-12z"/>
+  <text class="headText" x="285" y="181" text-anchor="middle">USUARIO</text>
+  <text class="field key" x="120" y="235">PK</text><text class="field" x="165" y="235">id</text>
+  <text class="field key" x="120" y="271">Único</text><text class="field" x="190" y="271">email</text>
+  <text class="field" x="120" y="307">first_name</text>
+  <text class="field" x="120" y="343">last_name</text>
+  <text class="field" x="120" y="379">rol</text>
+  <text class="field" x="120" y="415">is_active</text>
+  <rect class="badge" x="120" y="445" width="310" height="30" rx="15"/>
+  <text class="badgeText" x="275" y="465" text-anchor="middle">Rol: PACIENTE · PROFESIONAL · ADMINISTRADOR</text>
+
+  <!-- Relationship line and cardinality -->
+  <path class="rel" d="M480 315H640"/>
+  <path class="rel" d="M480 305v20m8-20v20"/>
+  <circle cx="632" cy="315" r="8" fill="#f4f7fb" stroke="#35658f" stroke-width="3"/>
+  <path class="rel" d="M648 305v20m8-20v20"/>
+  <text class="label" x="560" y="288" text-anchor="middle">tiene perfil</text>
+  <text class="note" x="480" y="354" text-anchor="start">1</text>
+  <text class="note" x="650" y="354" text-anchor="start">0..1</text>
+
+  <!-- Paciente table -->
+  <rect class="card" x="660" y="145" width="390" height="355" rx="12"/>
+  <path class="head" d="M672 145h366a12 12 0 0 1 12 12v48H660v-48a12 12 0 0 1 12-12z"/>
+  <text class="headText" x="855" y="181" text-anchor="middle">PACIENTE</text>
+  <text class="field key" x="690" y="235">PK</text><text class="field" x="735" y="235">id</text>
+  <text class="field key" x="690" y="271">FK · Único</text><text class="field" x="795" y="271">usuario_id</text>
+  <text class="field" x="690" y="307">tipo_documento</text>
+  <text class="field" x="690" y="343">numero_documento · único por tipo</text>
+  <text class="field" x="690" y="379">caracter_verificador</text>
+  <text class="field" x="690" y="415">fecha_nacimiento · celular</text>
+  <text class="field" x="690" y="451">consentimientos y fechas</text>
+
+  <text class="note" x="560" y="550" text-anchor="middle">Al eliminar un Usuario, Django elimina también su perfil Paciente (CASCADE).</text>
+</svg>
