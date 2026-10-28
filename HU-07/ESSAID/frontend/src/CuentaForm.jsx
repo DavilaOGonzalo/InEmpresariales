@@ -71,6 +71,7 @@ export default function CuentaForm({ cuenta, onSave, onCancel, error, procesando
       if (!datos.especialidad?.trim()) errores.especialidad = 'Ingresa la especialidad médica.';
       if (!datos.cmp?.trim()) errores.cmp = 'Ingresa el número CMP.';
       else if (datos.cmp.trim().length > 20) errores.cmp = 'El CMP admite hasta 20 caracteres.';
+      if (!esEdicion && !datos.direccion?.trim()) errores.direccion = 'Ingresa la dirección del médico.';
     }
     setErroresCampos(errores);
     if (Object.keys(errores).length) return;
@@ -125,7 +126,7 @@ export default function CuentaForm({ cuenta, onSave, onCancel, error, procesando
             <label>Sexo<select {...campoValidado('sexo')} name="sexo" value={datos.sexo || ''} onChange={actualizar} required><option value="">Selecciona una opcion</option><option value="femenino">Femenino</option><option value="masculino">Masculino</option><option value="otro">Otro</option><option value="no_especificado">Prefiero no decir</option></select>{erroresCampos.sexo && <small className="field-validation-error">{erroresCampos.sexo}</small>}</label>
             <label>Especialidad medica<input {...campoValidado('especialidad')} name="especialidad" maxLength={100} placeholder="Ej.: Cardiologia, pediatria" value={datos.especialidad || ''} onChange={actualizar} required />{erroresCampos.especialidad && <small className="field-validation-error">{erroresCampos.especialidad}</small>}</label>
             <label>Numero CMP<input {...campoValidado('cmp')} name="cmp" maxLength={20} placeholder="Numero de colegiatura del medico" value={datos.cmp || ''} onChange={actualizar} required />{erroresCampos.cmp && <small className="field-validation-error">{erroresCampos.cmp}</small>}<small>Es el numero asignado por el Colegio Medico del Peru; no es el DNI. Verificalo antes de guardarlo.</small></label>
-            <label><span>Direccion <small className="field-optional">(opcional)</small></span><textarea name="direccion" rows="3" value={datos.direccion || ''} onChange={actualizar} /></label>
+            <label><span>Direccion <small className="field-optional">{esEdicion ? '(opcional)' : '(obligatoria)'}</small></span><textarea {...campoValidado('direccion')} name="direccion" rows="3" value={datos.direccion || ''} onChange={actualizar} required={!esEdicion} />{erroresCampos.direccion && <small className="field-validation-error">{erroresCampos.direccion}</small>}</label>
           </div>
         </section>}
 
