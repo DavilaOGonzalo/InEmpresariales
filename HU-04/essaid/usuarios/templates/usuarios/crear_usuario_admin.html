@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crear usuario | EssAid</title>
+  <style>
+    :root { --ink: #203a56; --muted: #637b94; --blue: #397eb8; --line: #d7e3ee; --error: #a83232; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: #c6e3f8; color: var(--ink); font: 16px/1.5 system-ui, sans-serif; }
+    header { padding: 18px max(24px, calc((100% - 980px)/2)); background: #f7fafce8; border-bottom: 1px solid #ffffffa8; }
+    .brand { color: var(--blue); font-size: 1.2rem; font-weight: 750; }
+    main { display: grid; place-items: center; padding: 32px 16px; }
+    .card { width: min(100%, 620px); padding: clamp(24px, 5vw, 42px); border: 1px solid #ffffffd1; border-radius: 18px; background: #f5f8faf2; box-shadow: 0 22px 58px #17395636; }
+    h1 { margin: 0; font-size: clamp(1.7rem, 4vw, 2.1rem); }
+    .intro { margin: 8px 0 20px; color: var(--muted); }
+    .field { margin-top: 16px; }
+    label { display: block; margin-bottom: 6px; font-size: .92rem; font-weight: 650; }
+    input, select { width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid #c6d6e5; border-radius: 8px; background: #fffefa; color: var(--ink); font: inherit; }
+    input:focus, select:focus { outline: 3px solid #397eb82b; border-color: var(--blue); }
+    .group-title { margin: 28px 0 0; padding-top: 20px; border-top: 1px solid var(--line); font-size: 1.1rem; }
+    .note { color: var(--muted); font-size: .86rem; }
+    .errorlist, .error { margin: 6px 0 0; padding: 0; color: var(--error); font-size: .88rem; list-style: none; }
+    .actions { display: flex; justify-content: flex-end; margin-top: 28px; }
+    button { min-height: 44px; padding: 10px 18px; border: 0; border-radius: 9px; background: var(--blue); color: white; font: 650 .95rem system-ui, sans-serif; cursor: pointer; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <header><div class="brand">EssAid · Gestión</div></header>
+  <main>
+    <section class="card" aria-labelledby="titulo">
+      <h1 id="titulo">Crear cuenta de usuario</h1>
+      <p class="intro">Registra los datos y asigna un rol.</p>
+
+      {% if form.non_field_errors %}<div class="error">{{ form.non_field_errors }}</div>{% endif %}
+
+      <form method="post" novalidate id="crear-usuario-form">
+        {% csrf_token %}
+        {% for field in form %}
+          {% if field.name == 'first_name' or field.name == 'last_name' or field.name == 'email' or field.name == 'password1' or field.name == 'password2' or field.name == 'rol' %}
+            <div class="field">
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+              {{ field.errors }}
+            </div>
+          {% endif %}
+        {% endfor %}
+
+        <div id="datos-paciente" {% if form.rol.value != 'PACIENTE' %}hidden{% endif %}>
+          <h2 class="group-title">Datos del paciente</h2>
+          {% for field in form %}
+            {% if field.name == 'tipo_documento' or field.name == 'numero_documento' or field.name == 'caracter_verificador' or field.name == 'fecha_nacimiento' or field.name == 'celular' %}
+              <div class="field" {% if field.name == 'caracter_verificador' %}id="campo-verificador-admin"{% endif %}>
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {{ field.errors }}
+              </div>
+            {% endif %}
+          {% endfor %}
+          <p class="note">Las autorizaciones de tratamiento de datos deben ser aceptadas directamente por el paciente.</p>
+        </div>
+
+        <div class="actions"><button type="submit">Registrar usuario</button></div>
+      </form>
+    </section>
+  </main>
+  <script>
+    const rol = document.getElementById("id_rol");
+    const datosPaciente = document.getElementById("datos-paciente");
+    const tipoDocumento = document.getElementById("id_tipo_documento");
+    const campoVerificador = document.getElementById("campo-verificador-admin");
+    const actualizarCampos = () => {
+      const esPaciente = rol.value === "PACIENTE";
+      datosPaciente.hidden = !esPaciente;
+      ["tipo_documento", "numero_documento", "fecha_nacimiento", "celular"].forEach((nombre) => {
+        document.getElementById(`id_${nombre}`).required = esPaciente;
+      });
+      const esDni = esPaciente && tipoDocumento.value === "DNI";
+      campoVerificador.hidden = !esDni;
+      document.getElementById("id_caracter_verificador").required = esDni;
+      if (!esDni) document.getElementById("id_caracter_verificador").value = "";
+    };
+    rol.addEventListener("change", actualizarCampos);
+    tipoDocumento.addEventListener("change", actualizarCampos);
+    actualizarCampos();
+  </script>
+</body>
+</html>
