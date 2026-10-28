@@ -68,6 +68,10 @@ button { cursor: pointer; }
 .table-heading { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 21px 22px; }
 .table-heading h2 { margin: 0; color: #263d52; font-size: 14px; }
 .table-heading p { margin: 5px 0 0; color: #8a97a5; font-size: 11px; }
+.table-filters { display: flex; align-items: center; gap: 10px; }
+.role-filter { display: flex; align-items: center; gap: 8px; color: #718096; font-size: 11px; }
+.role-filter select { min-height: 37px; padding: 0 10px; border: 1px solid #dfe6ec; border-radius: 7px; color: #34495e; background: #fff; font: inherit; }
+.role-filter select:focus { border-color: #218e86; outline: none; box-shadow: 0 0 0 3px #16847d1c; }
 .search-box { width: min(100%, 280px); height: 37px; display: flex; align-items: center; gap: 8px; padding: 0 10px; border: 1px solid #dfe6ec; border-radius: 7px; color: #8c9aa8; }
 .search-box span { font-size: 19px; }
 .search-box input { width: 100%; border: 0; outline: 0; color: #34495e; background: transparent; font-size: 11px; }
@@ -145,6 +149,9 @@ td { padding: 13px 17px; border-top: 1px solid #eff2f5; color: #607184; font-siz
   .stat-grid { grid-template-columns: 1fr; }
   .stat-card { min-height: 76px; }
   .table-heading { align-items: flex-start; flex-direction: column; }
+  .table-filters { width: 100%; flex-direction: column; align-items: stretch; }
+  .role-filter { justify-content: space-between; }
+  .role-filter select { flex: 1; }
   .search-box { width: 100%; }
   .admin-login-card { padding: 28px 24px 24px; }
   .account-form-card { padding: 19px 15px; }
