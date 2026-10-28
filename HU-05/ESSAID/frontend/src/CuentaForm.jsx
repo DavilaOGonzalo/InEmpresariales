@@ -103,6 +103,7 @@ export default function CuentaForm({ cuenta, onSave, onCancel, error, procesando
           <h2>Datos de medico</h2>
           <div className="account-form-grid">
             <label>Fecha de nacimiento<input name="fecha_nacimiento" type="date" value={datos.fecha_nacimiento || ''} onChange={actualizar} required /></label>
+            <label>Edad<input value={calcularEdad(datos.fecha_nacimiento) ?? ''} readOnly placeholder="Se calcula con la fecha de nacimiento" /></label>
             <label><span>Identificacion adicional <small className="field-optional">(opcional)</small></span><input name="identificacion_complementaria" maxLength={100} placeholder="Pasaporte u otro documento, si aplica" value={datos.identificacion_complementaria || ''} onChange={actualizar} /><small className="field-help">Dejala vacia si no se necesita otro documento aparte del DNI.</small></label>
             <label>Sexo<select name="sexo" value={datos.sexo || ''} onChange={actualizar} required><option value="">Selecciona una opcion</option><option value="femenino">Femenino</option><option value="masculino">Masculino</option><option value="otro">Otro</option><option value="no_especificado">Prefiero no decir</option></select></label>
             <label>Especialidad medica<input name="especialidad" maxLength={100} placeholder="Ej.: Cardiologia, pediatria" value={datos.especialidad || ''} onChange={actualizar} required /></label>
