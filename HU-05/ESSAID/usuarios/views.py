@@ -139,10 +139,7 @@ def _validar_datos_rol(rol, datos, perfil=None):
             return 'Ingresa la especialidad medica.'
         if not cmp or len(cmp) > 20:
             return 'Ingresa un CMP valido.'
-        medicos_cmp = Medico.objects.filter(cmp=cmp)
-        if perfil:
-            medicos_cmp = medicos_cmp.exclude(usuario=perfil)
-        if medicos_cmp.exists():
+        if _cmp_duplicado(cmp, perfil):
             return 'Ya existe un medico con ese CMP.'
     elif rol == 'paciente':
         tipo_sangre = str(datos.get('tipo_sangre', '')).strip()
@@ -153,6 +150,13 @@ def _validar_datos_rol(rol, datos, perfil=None):
         if len(str(datos.get('telefono_emergencia', '')).strip()) > 20:
             return 'El telefono de emergencia admite hasta 20 caracteres.'
     return None
+
+
+def _cmp_duplicado(cmp, perfil=None):
+    medicos = Medico.objects.filter(cmp=cmp)
+    if perfil:
+        medicos = medicos.exclude(usuario=perfil)
+    return medicos.exists()
 
 
 def _guardar_datos_rol(perfil, datos):
@@ -296,6 +300,9 @@ def administrar_cuentas(request):
             _sincronizar_perfil_rol(perfil)
             _guardar_datos_rol(perfil, datos)
     except IntegrityError:
+        cmp = str(datos.get('cmp', '')).strip()
+        if rol == 'medico' and _cmp_duplicado(cmp):
+            return JsonResponse({'error': 'Ya existe un medico con ese CMP.'}, status=409)
         return JsonResponse({'error': 'No se pudo crear la cuenta: revisa si el correo o el DNI ya están registrados.'}, status=409)
 
     return JsonResponse({'cuenta': _perfil_json(perfil)}, status=201)
@@ -412,6 +419,9 @@ def administrar_cuenta(request, cuenta_id):
                     perfil.cuenta = cuenta_destino
                     perfil.save(update_fields=['cuenta'])
     except IntegrityError:
+        cmp = str(datos.get('cmp', '')).strip()
+        if rol == 'medico' and _cmp_duplicado(cmp, perfil):
+            return JsonResponse({'error': 'Ya existe un medico con ese CMP.'}, status=409)
         return JsonResponse({'error': 'No se pudieron guardar los cambios: revisa el correo o el DNI.'}, status=409)
 
     return JsonResponse({'cuenta': _perfil_json(perfil)})
