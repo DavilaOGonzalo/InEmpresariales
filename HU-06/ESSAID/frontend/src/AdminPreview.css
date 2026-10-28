@@ -25,6 +25,7 @@ button { cursor: pointer; }
 .login-form .primary-button { height: 47px; margin-top: 0; }
 .preview-note { margin: 19px 0 0; padding: 11px 12px; border-radius: 8px; color: #60768a; background: #f2f6f9; font-size: 11px; line-height: 1.55; }
 .form-error { grid-column: 1 / -1; margin: 4px 0 0; padding: 10px 12px; border-radius: 8px; color: #9b3e43; background: #fff0f0; font-size: 12px; line-height: 1.45; }
+.success-message { margin: 0 0 16px; padding: 11px 14px; border: 1px solid #cce9d5; border-radius: 8px; color: #26744b; background: #eff9f2; font-size: 12px; }
 .login-form .form-error { margin: 4px 0 0; }
 
 .admin-shell { min-height: 100vh; }

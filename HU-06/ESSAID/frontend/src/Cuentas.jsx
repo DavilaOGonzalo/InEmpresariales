@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 
-export default function Cuentas({ cuentas, navegar, onDelete, onToggleStatus, procesando }) {
+export default function Cuentas({ cuentas, navegar, onDelete, onToggleStatus, procesando, mensajeExito }) {
   const [busqueda, setBusqueda] = useState('');
   const [filtroRol, setFiltroRol] = useState('todos');
   const cuentasPorRol = useMemo(() => filtroRol === 'todos'
@@ -13,6 +13,7 @@ export default function Cuentas({ cuentas, navegar, onDelete, onToggleStatus, pr
   return (
     <section className="admin-content">
       <div className="page-heading"><div><p className="eyebrow">GESTION DE ACCESOS</p><h1>Cuentas de usuario</h1><p className="heading-copy">Administra quien puede acceder al sistema.</p></div><button className="primary-button add-button" onClick={() => navegar('/admin/cuentas/nueva')}><span>＋</span> Crear cuenta</button></div>
+      {mensajeExito && <p className="success-message" role="status" aria-live="polite">{mensajeExito}</p>}
       <div className="stat-grid">
         <article className="stat-card"><span className="stat-icon teal">♙</span><div><small>Total de cuentas</small><strong>{cuentas.length}</strong></div></article>
         <article className="stat-card"><span className="stat-icon green">✓</span><div><small>Cuentas activas</small><strong>{cuentas.filter((cuenta) => cuenta.estado === 'Activa').length}</strong></div></article>

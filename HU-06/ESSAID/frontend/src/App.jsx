@@ -16,6 +16,7 @@ export default function App() {
   const [procesando, setProcesando] = useState(false);
   const [errorLogin, setErrorLogin] = useState('');
   const [errorFormulario, setErrorFormulario] = useState('');
+  const [mensajeExito, setMensajeExito] = useState('');
 
   async function cargarCuentas() {
     const resultado = await api(RUTA_CUENTAS);
@@ -81,6 +82,7 @@ export default function App() {
     const editar = ruta.match(/^\/admin\/cuentas\/(\d+)\/editar\/?$/);
     setProcesando(true);
     setErrorFormulario('');
+    setMensajeExito('');
     try {
       const resultado = await api(editar ? `${RUTA_CUENTAS}${editar[1]}/` : RUTA_CUENTAS, {
         method: editar ? 'PATCH' : 'POST',
@@ -89,6 +91,7 @@ export default function App() {
       });
       if (editar) {
         setCuentas((actuales) => actuales.map((cuenta) => cuenta.id === Number(editar[1]) ? resultado.cuenta : cuenta));
+        setMensajeExito(`Se guardaron los cambios de ${resultado.cuenta.nombre} ${resultado.cuenta.apellido}.`);
       } else {
         setCuentas((actuales) => [...actuales, resultado.cuenta]);
       }
@@ -148,7 +151,7 @@ export default function App() {
       ? <section className="admin-content"><div className="page-heading"><div><p className="eyebrow">PERFIL MEDICO</p><h1>{medico.nombre} {medico.apellido}</h1><p className="heading-copy">Consulta los datos registrados y su especialidad.</p></div></div><article className="account-form-card doctor-detail"><dl><div><dt>Especialidad</dt><dd>{medico.especialidad || 'Sin registrar'}</dd></div><div><dt>CMP</dt><dd>{medico.cmp || 'Sin registrar'}</dd></div><div><dt>DNI</dt><dd>{medico.dni || 'Sin registrar'}</dd></div><div><dt>Correo</dt><dd>{medico.correo || 'Sin registrar'}</dd></div><div><dt>Telefono</dt><dd>{medico.telefono || 'Sin registrar'}</dd></div><div><dt>Fecha de nacimiento</dt><dd>{medico.fecha_nacimiento || 'Sin registrar'}{medico.edad != null ? ` (${medico.edad} años)` : ''}</dd></div><div><dt>Sexo</dt><dd>{medico.sexo || 'Sin registrar'}</dd></div><div><dt>Direccion</dt><dd>{medico.direccion || 'Sin registrar'}</dd></div><div><dt>Estado</dt><dd>{medico.estado}</dd></div></dl><div className="account-form-actions"><button className="secondary-button" onClick={() => navegar('/admin/cuentas')}>Volver a la lista</button><button className="primary-button" onClick={() => navegar(`/admin/cuentas/${medico.id}/editar`)}>Editar medico</button></div></article></section>
       : <section className="admin-content"><p className="form-error">No se encontro ese medico.</p><button className="secondary-button" onClick={() => navegar('/admin/cuentas')}>Volver a las cuentas</button></section>;
   } else if (pagina === '/admin/cuentas') {
-    contenido = <Cuentas cuentas={cuentas} navegar={navegar} onDelete={eliminarCuenta} onToggleStatus={cambiarEstadoCuenta} procesando={procesando} />;
+    contenido = <Cuentas cuentas={cuentas} navegar={navegar} onDelete={eliminarCuenta} onToggleStatus={cambiarEstadoCuenta} procesando={procesando} mensajeExito={mensajeExito} />;
   } else {
     contenido = <section className="admin-content"><h1>Pagina no encontrada</h1><button className="secondary-button" onClick={() => navegar('/admin/cuentas')}>Volver a las cuentas</button></section>;
   }
