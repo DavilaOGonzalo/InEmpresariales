@@ -133,6 +133,9 @@ def _validar_datos_rol(rol, datos, perfil=None):
         identificacion = str(datos.get('identificacion_complementaria', '')).strip()
         especialidad = str(datos.get('especialidad', '')).strip()
         cmp = str(datos.get('cmp', '')).strip()
+        direccion = str(datos.get('direccion', '')).strip()
+        if perfil is None and not direccion:
+            return 'Ingresa la direccion del medico.'
         if len(identificacion) > 100:
             return 'La identificacion complementaria admite hasta 100 caracteres.'
         if not especialidad or len(especialidad) > 100:
