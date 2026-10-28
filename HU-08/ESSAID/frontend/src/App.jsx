@@ -8,8 +8,14 @@ import { useRuta } from './useRuta.js';
 
 function DetalleCuenta({ cuenta, rutaLista, urlRuta, navegar }) {
   const dato = (valor) => valor || 'Sin registrar';
+  const grupos = [
+    { titulo: 'Datos de cuenta', campos: [['DNI', cuenta.dni], ['Correo', cuenta.correo], ['Teléfono', cuenta.telefono], ['Rol', cuenta.rol_nombre], ['Estado', cuenta.estado]] },
+    cuenta.rol === 'medico' && { titulo: 'Datos de médico', campos: [['Especialidad', cuenta.especialidad], ['CMP', cuenta.cmp], ['Fecha de nacimiento', cuenta.fecha_nacimiento], ['Edad', cuenta.edad != null ? `${cuenta.edad} años` : ''], ['Sexo', cuenta.sexo], ['Dirección', cuenta.direccion], ['Identificación complementaria', cuenta.identificacion_complementaria]] },
+    cuenta.rol === 'paciente' && { titulo: 'Datos de paciente', campos: [['Fecha de nacimiento', cuenta.fecha_nacimiento], ['Edad', cuenta.edad != null ? `${cuenta.edad} años` : ''], ['Sexo', cuenta.sexo], ['Dirección', cuenta.direccion], ['Información de contacto', cuenta.informacion_contacto], ['Tipo de sangre', cuenta.tipo_sangre], ['Contacto de emergencia', cuenta.contacto_emergencia], ['Teléfono de emergencia', cuenta.telefono_emergencia]] },
+  ].filter(Boolean);
   return <section className="admin-content"><div className="page-heading"><div><p className="eyebrow">DETALLE DE CUENTA</p><h1>{cuenta.nombre} {cuenta.apellido}</h1><p className="heading-copy">Consulta la información general de la cuenta.</p></div></div>
-    <article className="account-form-card doctor-detail detail-section"><h2>Datos de cuenta</h2><dl>{[['DNI', cuenta.dni], ['Correo', cuenta.correo], ['Teléfono', cuenta.telefono], ['Rol', cuenta.rol_nombre], ['Estado', cuenta.estado]].map(([etiqueta, valor]) => <div key={etiqueta}><dt>{etiqueta}</dt><dd>{dato(valor)}</dd></div>)}</dl><div className="account-form-actions"><button className="secondary-button" onClick={() => navegar(rutaLista)}>Volver a la lista</button><button className="primary-button" onClick={() => navegar(`/admin/cuentas/${cuenta.id}/editar${urlRuta.search}`)}>Editar cuenta</button></div></article>
+    {grupos.map((grupo) => <article className="account-form-card doctor-detail detail-section" key={grupo.titulo}><h2>{grupo.titulo}</h2><dl>{grupo.campos.map(([etiqueta, valor]) => <div key={etiqueta}><dt>{etiqueta}</dt><dd>{dato(valor)}</dd></div>)}</dl></article>)}
+    <div className="account-form-actions"><button className="secondary-button" onClick={() => navegar(rutaLista)}>Volver a la lista</button><button className="primary-button" onClick={() => navegar(`/admin/cuentas/${cuenta.id}/editar${urlRuta.search}`)}>Editar cuenta</button></div>
   </section>;
 }
 
