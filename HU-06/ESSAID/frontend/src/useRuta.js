@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 
 export function useRuta() {
-  const [ruta, setRuta] = useState(() => window.location.pathname);
+  const [ruta, setRuta] = useState(() => `${window.location.pathname}${window.location.search}`);
 
   useEffect(() => {
-    const actualizar = () => setRuta(window.location.pathname);
+    const actualizar = () => setRuta(`${window.location.pathname}${window.location.search}`);
     window.addEventListener('popstate', actualizar);
     return () => window.removeEventListener('popstate', actualizar);
   }, []);

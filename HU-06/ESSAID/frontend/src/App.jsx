@@ -40,7 +40,7 @@ export default function App() {
 
   useEffect(() => {
     if (cargando) return;
-    const pagina = ruta.replace(/\/+$/, '') || '/';
+    const pagina = new URL(ruta, window.location.origin).pathname.replace(/\/+$/, '') || '/';
     if (!administrador && pagina !== '/admin/login') navegar('/admin/login', true);
     else if (administrador && (pagina === '/' || pagina === '/admin/login')) navegar('/admin/cuentas', true);
   }, [administrador, cargando, navegar, ruta]);
@@ -79,7 +79,7 @@ export default function App() {
   }
 
   async function guardarCuenta(datos) {
-    const editar = ruta.match(/^\/admin\/cuentas\/(\d+)\/editar\/?$/);
+    const editar = new URL(ruta, window.location.origin).pathname.match(/^\/admin\/cuentas\/(\d+)\/editar\/?$/);
     setProcesando(true);
     setErrorFormulario('');
     setMensajeExito('');
@@ -95,7 +95,7 @@ export default function App() {
       } else {
         setCuentas((actuales) => [...actuales, resultado.cuenta]);
       }
-      navegar('/admin/cuentas');
+      navegar(`/admin/cuentas${new URL(ruta, window.location.origin).search}`);
     } catch (error) {
       setErrorFormulario(error.message);
     } finally {
@@ -134,24 +134,26 @@ export default function App() {
 
   if (!administrador) return <LoginAdmin onLogin={iniciarSesion} error={errorLogin} procesando={procesando || cargando} />;
 
-  const pagina = ruta.replace(/\/+$/, '') || '/';
+  const urlRuta = new URL(ruta, window.location.origin);
+  const pagina = urlRuta.pathname.replace(/\/+$/, '') || '/';
+  const rutaLista = `/admin/cuentas${urlRuta.search}`;
   const editar = pagina.match(/^\/admin\/cuentas\/(\d+)\/editar$/);
   const verMedico = pagina.match(/^\/admin\/cuentas\/(\d+)$/);
   let contenido;
   if (pagina === '/admin/cuentas/nueva') {
-    contenido = <CuentaForm onSave={guardarCuenta} onCancel={() => navegar('/admin/cuentas')} error={errorFormulario} procesando={procesando} />;
+    contenido = <CuentaForm onSave={guardarCuenta} onCancel={() => navegar(rutaLista)} error={errorFormulario} procesando={procesando} />;
   } else if (editar) {
     const cuenta = cuentas.find((item) => item.id === Number(editar[1]));
     contenido = cuenta
-      ? <CuentaForm cuenta={cuenta} onSave={guardarCuenta} onCancel={() => navegar('/admin/cuentas')} error={errorFormulario} procesando={procesando} />
-      : <section className="admin-content"><p className="form-error">No se encontro esa cuenta.</p><button className="secondary-button" onClick={() => navegar('/admin/cuentas')}>Volver a las cuentas</button></section>;
+      ? <CuentaForm cuenta={cuenta} onSave={guardarCuenta} onCancel={() => navegar(rutaLista)} error={errorFormulario} procesando={procesando} />
+      : <section className="admin-content"><p className="form-error">No se encontro esa cuenta.</p><button className="secondary-button" onClick={() => navegar(rutaLista)}>Volver a las cuentas</button></section>;
   } else if (verMedico) {
     const medico = cuentas.find((item) => item.id === Number(verMedico[1]) && item.rol === 'medico');
     contenido = medico
-      ? <section className="admin-content"><div className="page-heading"><div><p className="eyebrow">PERFIL MEDICO</p><h1>{medico.nombre} {medico.apellido}</h1><p className="heading-copy">Consulta los datos registrados y su especialidad.</p></div></div><article className="account-form-card doctor-detail"><dl><div><dt>Especialidad</dt><dd>{medico.especialidad || 'Sin registrar'}</dd></div><div><dt>CMP</dt><dd>{medico.cmp || 'Sin registrar'}</dd></div><div><dt>DNI</dt><dd>{medico.dni || 'Sin registrar'}</dd></div><div><dt>Correo</dt><dd>{medico.correo || 'Sin registrar'}</dd></div><div><dt>Telefono</dt><dd>{medico.telefono || 'Sin registrar'}</dd></div><div><dt>Fecha de nacimiento</dt><dd>{medico.fecha_nacimiento || 'Sin registrar'}{medico.edad != null ? ` (${medico.edad} años)` : ''}</dd></div><div><dt>Sexo</dt><dd>{medico.sexo || 'Sin registrar'}</dd></div><div><dt>Direccion</dt><dd>{medico.direccion || 'Sin registrar'}</dd></div><div><dt>Estado</dt><dd>{medico.estado}</dd></div></dl><div className="account-form-actions"><button className="secondary-button" onClick={() => navegar('/admin/cuentas')}>Volver a la lista</button><button className="primary-button" onClick={() => navegar(`/admin/cuentas/${medico.id}/editar`)}>Editar medico</button></div></article></section>
-      : <section className="admin-content"><p className="form-error">No se encontro ese medico.</p><button className="secondary-button" onClick={() => navegar('/admin/cuentas')}>Volver a las cuentas</button></section>;
+      ? <section className="admin-content"><div className="page-heading"><div><p className="eyebrow">PERFIL MEDICO</p><h1>{medico.nombre} {medico.apellido}</h1><p className="heading-copy">Consulta los datos registrados y su especialidad.</p></div></div><article className="account-form-card doctor-detail"><dl><div><dt>Especialidad</dt><dd>{medico.especialidad || 'Sin registrar'}</dd></div><div><dt>CMP</dt><dd>{medico.cmp || 'Sin registrar'}</dd></div><div><dt>DNI</dt><dd>{medico.dni || 'Sin registrar'}</dd></div><div><dt>Correo</dt><dd>{medico.correo || 'Sin registrar'}</dd></div><div><dt>Telefono</dt><dd>{medico.telefono || 'Sin registrar'}</dd></div><div><dt>Fecha de nacimiento</dt><dd>{medico.fecha_nacimiento || 'Sin registrar'}{medico.edad != null ? ` (${medico.edad} años)` : ''}</dd></div><div><dt>Sexo</dt><dd>{medico.sexo || 'Sin registrar'}</dd></div><div><dt>Direccion</dt><dd>{medico.direccion || 'Sin registrar'}</dd></div><div><dt>Estado</dt><dd>{medico.estado}</dd></div></dl><div className="account-form-actions"><button className="secondary-button" onClick={() => navegar(rutaLista)}>Volver a la lista</button><button className="primary-button" onClick={() => navegar(`/admin/cuentas/${medico.id}/editar${urlRuta.search}`)}>Editar medico</button></div></article></section>
+      : <section className="admin-content"><p className="form-error">No se encontro ese medico.</p><button className="secondary-button" onClick={() => navegar(rutaLista)}>Volver a las cuentas</button></section>;
   } else if (pagina === '/admin/cuentas') {
-    contenido = <Cuentas cuentas={cuentas} navegar={navegar} onDelete={eliminarCuenta} onToggleStatus={cambiarEstadoCuenta} procesando={procesando} mensajeExito={mensajeExito} />;
+    contenido = <Cuentas cuentas={cuentas} navegar={navegar} onDelete={eliminarCuenta} onToggleStatus={cambiarEstadoCuenta} procesando={procesando} mensajeExito={mensajeExito} consultaInicial={urlRuta.search} />;
   } else {
     contenido = <section className="admin-content"><h1>Pagina no encontrada</h1><button className="secondary-button" onClick={() => navegar('/admin/cuentas')}>Volver a las cuentas</button></section>;
   }
