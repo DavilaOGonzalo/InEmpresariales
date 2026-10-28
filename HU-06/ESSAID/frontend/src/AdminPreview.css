@@ -117,6 +117,8 @@ td { padding: 13px 17px; border-top: 1px solid #eff2f5; color: #607184; font-siz
 .role-fields .account-form-grid label > span { display: flex; flex-wrap: wrap; align-items: baseline; gap: 5px; }
 .role-fields .account-form-grid label .field-optional, .role-fields .account-form-grid label .field-help { color: #718093; font-size: 11px; font-weight: 400; }
 .role-fields .account-form-grid label .field-help { display: block; }
+.field-validation-error { color: #a43f45; font-size: 11px; font-weight: 500; }
+.account-form-grid input[aria-invalid="true"], .account-form-grid select[aria-invalid="true"] { border-color: #c75960; }
 .account-form-card > label { display: grid; gap: 7px; margin-top: 18px; color: #344a60; font-size: 12px; font-weight: 700; }
 .account-form-card > label input { width: 100%; max-width: 420px; height: 42px; padding: 0 12px; border: 1px solid #dce4eb; border-radius: 8px; color: #203951; background: white; font: inherit; font-size: 12px; }
 .account-form-card > label small { color: #718093; font-size: 11px; font-weight: 400; }

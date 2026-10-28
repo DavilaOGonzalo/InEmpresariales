@@ -35,6 +35,7 @@ function calcularEdad(fecha) {
 
 export default function CuentaForm({ cuenta, onSave, onCancel, error, procesando }) {
   const [datos, setDatos] = useState(VACIO);
+  const [erroresCampos, setErroresCampos] = useState({});
   const esEdicion = Boolean(cuenta);
   const esMedico = datos.rol === 'medico';
   const esPaciente = datos.rol === 'paciente';
@@ -45,6 +46,7 @@ export default function CuentaForm({ cuenta, onSave, onCancel, error, procesando
 
   function actualizar(evento) {
     const { name, value } = evento.target;
+    setErroresCampos((actuales) => ({ ...actuales, [name]: '' }));
     setDatos((actuales) => name === 'rol'
       ? { ...actuales, rol: value, permisos: PERMISOS_INICIALES[value] || [] }
       : { ...actuales, [name]: value });
@@ -61,7 +63,22 @@ export default function CuentaForm({ cuenta, onSave, onCancel, error, procesando
 
   function enviar(evento) {
     evento.preventDefault();
+    const errores = {};
+    if (esMedico) {
+      if (!datos.fecha_nacimiento) errores.fecha_nacimiento = 'Ingresa la fecha de nacimiento.';
+      else if (datos.fecha_nacimiento > new Date().toISOString().slice(0, 10)) errores.fecha_nacimiento = 'La fecha no puede ser futura.';
+      if (!datos.sexo) errores.sexo = 'Selecciona el sexo del médico.';
+      if (!datos.especialidad?.trim()) errores.especialidad = 'Ingresa la especialidad médica.';
+      if (!datos.cmp?.trim()) errores.cmp = 'Ingresa el número CMP.';
+      else if (datos.cmp.trim().length > 20) errores.cmp = 'El CMP admite hasta 20 caracteres.';
+    }
+    setErroresCampos(errores);
+    if (Object.keys(errores).length) return;
     onSave(datos);
+  }
+
+  function campoValidado(nombre, props = {}) {
+    return { ...props, 'aria-invalid': Boolean(erroresCampos[nombre]) };
   }
 
   return (
@@ -102,12 +119,12 @@ export default function CuentaForm({ cuenta, onSave, onCancel, error, procesando
         {esMedico && <section className="role-fields">
           <h2>Datos de medico</h2>
           <div className="account-form-grid">
-            <label>Fecha de nacimiento<input name="fecha_nacimiento" type="date" value={datos.fecha_nacimiento || ''} onChange={actualizar} required /></label>
+            <label>Fecha de nacimiento<input {...campoValidado('fecha_nacimiento')} name="fecha_nacimiento" type="date" value={datos.fecha_nacimiento || ''} onChange={actualizar} required />{erroresCampos.fecha_nacimiento && <small className="field-validation-error">{erroresCampos.fecha_nacimiento}</small>}</label>
             <label>Edad<input value={calcularEdad(datos.fecha_nacimiento) ?? ''} readOnly placeholder="Se calcula con la fecha de nacimiento" /></label>
             <label><span>Identificacion adicional <small className="field-optional">(opcional)</small></span><input name="identificacion_complementaria" maxLength={100} placeholder="Pasaporte u otro documento, si aplica" value={datos.identificacion_complementaria || ''} onChange={actualizar} /><small className="field-help">Dejala vacia si no se necesita otro documento aparte del DNI.</small></label>
-            <label>Sexo<select name="sexo" value={datos.sexo || ''} onChange={actualizar} required><option value="">Selecciona una opcion</option><option value="femenino">Femenino</option><option value="masculino">Masculino</option><option value="otro">Otro</option><option value="no_especificado">Prefiero no decir</option></select></label>
-            <label>Especialidad medica<input name="especialidad" maxLength={100} placeholder="Ej.: Cardiologia, pediatria" value={datos.especialidad || ''} onChange={actualizar} required /></label>
-            <label>Numero CMP<input name="cmp" maxLength={20} placeholder="Numero de colegiatura del medico" value={datos.cmp || ''} onChange={actualizar} required /><small>Es el numero asignado por el Colegio Medico del Peru; no es el DNI. Verificalo antes de guardarlo.</small></label>
+            <label>Sexo<select {...campoValidado('sexo')} name="sexo" value={datos.sexo || ''} onChange={actualizar} required><option value="">Selecciona una opcion</option><option value="femenino">Femenino</option><option value="masculino">Masculino</option><option value="otro">Otro</option><option value="no_especificado">Prefiero no decir</option></select>{erroresCampos.sexo && <small className="field-validation-error">{erroresCampos.sexo}</small>}</label>
+            <label>Especialidad medica<input {...campoValidado('especialidad')} name="especialidad" maxLength={100} placeholder="Ej.: Cardiologia, pediatria" value={datos.especialidad || ''} onChange={actualizar} required />{erroresCampos.especialidad && <small className="field-validation-error">{erroresCampos.especialidad}</small>}</label>
+            <label>Numero CMP<input {...campoValidado('cmp')} name="cmp" maxLength={20} placeholder="Numero de colegiatura del medico" value={datos.cmp || ''} onChange={actualizar} required />{erroresCampos.cmp && <small className="field-validation-error">{erroresCampos.cmp}</small>}<small>Es el numero asignado por el Colegio Medico del Peru; no es el DNI. Verificalo antes de guardarlo.</small></label>
             <label><span>Direccion <small className="field-optional">(opcional)</small></span><textarea name="direccion" rows="3" value={datos.direccion || ''} onChange={actualizar} /></label>
           </div>
         </section>}
