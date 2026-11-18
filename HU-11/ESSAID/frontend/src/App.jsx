@@ -9,11 +9,16 @@ import Hospitales from './components/Hospitales.jsx';
 import HospitalForm from './components/HospitalForm.jsx';
 import HospitalDetalle from './components/HospitalDetalle.jsx';
 import ServiciosMedicos from './components/ServiciosMedicos.jsx';
+import ServicioMedicoForm from './components/ServicioMedicoForm.jsx';
+import AsignarServicioForm from './components/AsignarServicioForm.jsx';
+import ServiciosAsignados from './components/ServiciosAsignados.jsx';
+import ServicioDetalle from './components/ServicioDetalle.jsx';
 import { useRuta } from './useRuta.js';
 
 const RUTA_CUENTAS = '/api/admin/cuentas/';
 const RUTA_HOSPITALES = '/api/admin/hospitales/';
-const RUTA_SERVICIOS = RUTA_HOSPITALES + 'servicios/';
+const RUTA_SERVICIOS = '/api/admin/servicios/';
+const RUTA_ASIGNACIONES = RUTA_SERVICIOS + 'asignaciones/';
 
 export default function App() {
   const [ruta, navegar] = useRuta();
@@ -21,6 +26,7 @@ export default function App() {
   const [cuentas, setCuentas] = useState([]);
   const [hospitales, setHospitales] = useState([]);
   const [servicios, setServicios] = useState([]);
+  const [asignaciones, setAsignaciones] = useState([]);
   const [totalCuentas, setTotalCuentas] = useState(0);
   const [cargando, setCargando] = useState(true);
   const [procesando, setProcesando] = useState(false);
@@ -29,6 +35,9 @@ export default function App() {
   const [errorHospital, setErrorHospital] = useState('');
   const [mensajeHospital, setMensajeHospital] = useState('');
   const [mensajeServicio, setMensajeServicio] = useState('');
+  const [errorServicio, setErrorServicio] = useState('');
+  const [mensajeAsignacion, setMensajeAsignacion] = useState('');
+  const [errorAsignacion, setErrorAsignacion] = useState('');
   const [mensajeExito, setMensajeExito] = useState('');
 
   async function cargarCuentas() {
@@ -45,6 +54,11 @@ export default function App() {
   async function cargarServicios() {
     const resultado = await api(RUTA_SERVICIOS);
     setServicios(resultado.servicios);
+  }
+
+  async function cargarAsignaciones() {
+    const resultado = await api(RUTA_ASIGNACIONES);
+    setAsignaciones(resultado.asignaciones);
   }
 
   useEffect(() => {
@@ -79,7 +93,7 @@ export default function App() {
         body: JSON.stringify(credenciales),
       });
       setAdministrador(sesion.usuario);
-      await Promise.all([cargarCuentas(), cargarHospitales(), cargarServicios()]);
+      await Promise.all([cargarCuentas(), cargarHospitales(), cargarServicios(), cargarAsignaciones()]);
       navegar('/admin/cuentas', true);
     } catch (error) {
       setErrorLogin(error.message);
@@ -96,6 +110,7 @@ export default function App() {
       setCuentas([]);
       setHospitales([]);
       setServicios([]);
+      setAsignaciones([]);
       setTotalCuentas(0);
       navegar('/admin/login', true);
     } catch (error) {
@@ -157,6 +172,54 @@ export default function App() {
       setProcesando(false);
     }
   }
+  async function guardarServicio(datos) {
+    const editarServicio = new URL(ruta, window.location.origin).pathname.match(/^\/admin\/servicios\/(\d+)\/editar\/?$/);
+    setProcesando(true);
+    setErrorServicio('');
+    setMensajeServicio('');
+    try {
+      const endpoint = editarServicio ? `${RUTA_SERVICIOS}${editarServicio[1]}/` : RUTA_SERVICIOS;
+      const resultado = await api(endpoint, {
+        method: editarServicio ? 'PATCH' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(datos),
+      });
+      if (editarServicio) {
+        setServicios((actuales) => actuales.map((servicio) => servicio.id === Number(editarServicio[1]) ? resultado.servicio : servicio));
+        setAsignaciones((actuales) => actuales.map((item) => item.servicio_id === resultado.servicio.id ? { ...item, servicio_nombre: resultado.servicio.nombre, servicio_numero: resultado.servicio.numero, descripcion: resultado.servicio.descripcion } : item));
+        setMensajeServicio(`Se guardaron los cambios del servicio ${resultado.servicio.nombre}.`);
+      } else {
+        setServicios((actuales) => [...actuales, resultado.servicio].sort((a, b) => a.numero - b.numero));
+        setMensajeServicio(`Se agrego ${resultado.servicio.nombre} al catalogo.`);
+      }
+      navegar('/admin/servicios');
+    } catch (error) {
+      setErrorServicio(error.message);
+    } finally {
+      setProcesando(false);
+    }
+  }
+
+  async function guardarAsignacion(datos) {
+    setProcesando(true);
+    setErrorAsignacion('');
+    setMensajeAsignacion('');
+    try {
+      const resultado = await api(RUTA_ASIGNACIONES, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(datos),
+      });
+      setAsignaciones((actuales) => [...actuales, resultado.asignacion]);
+      setMensajeAsignacion(`Se asigno ${resultado.asignacion.servicio_nombre} a ${resultado.asignacion.hospital_nombre}.`);
+      navegar('/admin/servicios/asignados');
+    } catch (error) {
+      setErrorAsignacion(error.message);
+    } finally {
+      setProcesando(false);
+    }
+  }
+
   async function eliminarCuenta(cuenta) {
     if (!window.confirm(`Eliminar la cuenta de ${cuenta.nombre} ${cuenta.apellido}?`)) return;
     setProcesando(true);
@@ -211,8 +274,26 @@ export default function App() {
       : <section className="admin-content"><p className="form-error">No se encontro ese hospital.</p><button className="secondary-button" onClick={() => navegar('/admin/hospitales')}>Volver a hospitales</button></section>;
   } else if (pagina === '/admin/hospitales') {
     contenido = <Hospitales hospitales={hospitales} navegar={navegar} mensaje={mensajeHospital} />;
+  } else if (pagina === '/admin/servicios/nuevo') {
+    contenido = <ServicioMedicoForm onSave={guardarServicio} onCancel={() => navegar('/admin/servicios')} error={errorServicio} procesando={procesando} />;
+  } else if (pagina.match(/^\/admin\/servicios\/(\d+)\/editar$/)) {
+    const servicioId = Number(pagina.split('/')[3]);
+    const servicio = servicios.find((item) => item.id === servicioId);
+    contenido = servicio
+      ? <ServicioMedicoForm key={servicio.id} servicio={servicio} onSave={guardarServicio} onCancel={() => navegar('/admin/servicios')} error={errorServicio} procesando={procesando} />
+      : <section className="admin-content"><p className="form-error">No se encontro ese servicio.</p><button className="secondary-button" onClick={() => navegar('/admin/servicios')}>Volver al catalogo</button></section>;
+  } else if (pagina.match(/^\/admin\/servicios\/(\d+)$/)) {
+    const servicioId = Number(pagina.split('/')[3]);
+    const servicio = servicios.find((item) => item.id === servicioId);
+    contenido = servicio
+      ? <ServicioDetalle servicio={servicio} asignaciones={asignaciones} navegar={navegar} />
+      : <section className="admin-content"><p className="form-error">No se encontro ese servicio.</p><button className="secondary-button" onClick={() => navegar('/admin/servicios')}>Volver al catalogo</button></section>;
+  } else if (pagina === '/admin/servicios/asignar') {
+    contenido = <AsignarServicioForm key={urlRuta.search} servicios={servicios} hospitales={hospitales} servicioInicial={urlRuta.searchParams.get('servicio')} onSave={guardarAsignacion} onCancel={() => navegar('/admin/servicios')} error={errorAsignacion} procesando={procesando} />;
+  } else if (pagina === '/admin/servicios/asignados') {
+    contenido = <ServiciosAsignados asignaciones={asignaciones} navegar={navegar} mensaje={mensajeAsignacion} />;
   } else if (pagina === '/admin/servicios') {
-    contenido = <ServiciosMedicos servicios={servicios} navegar={navegar} mensaje={mensajeServicio} />;
+    contenido = <ServiciosMedicos servicios={servicios} asignaciones={asignaciones} navegar={navegar} mensaje={mensajeServicio} />;
   } else if (pagina === '/admin/cuentas/nueva') {
     contenido = <CuentaForm onSave={guardarCuenta} onCancel={() => navegar(rutaLista)} error={errorFormulario} procesando={procesando} />;
   } else if (editar) {

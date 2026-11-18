@@ -175,3 +175,11 @@ td { padding: 13px 17px; border-top: 1px solid #eff2f5; color: #607184; font-siz
   .account-form-card { padding: 19px 15px; }
   .account-form-grid { grid-template-columns: 1fr; }
 }
+
+.page-actions { display: flex; align-items: center; gap: 10px; }
+@media (max-width: 650px) { .page-actions { flex-wrap: wrap; } }
+
+.service-description-cell { width: 34%; max-width: 360px; white-space: normal; }
+.service-description-cell p { display: -webkit-box; max-width: 360px; margin: 0; overflow: hidden; color: inherit; line-height: 1.45; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.service-detail dl { grid-template-columns: 1fr; }
+.service-full-description dd { max-width: 780px; line-height: 1.7; font-weight: 400; overflow-wrap: anywhere; white-space: pre-wrap; }

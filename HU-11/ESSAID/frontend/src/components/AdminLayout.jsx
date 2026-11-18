@@ -4,16 +4,17 @@ export default function AdminLayout({ administrador, ruta, navegar, onLogout, ch
   const editar = ruta.includes('/editar');
   const crear = ruta.endsWith('/nueva') || ruta.endsWith('/nuevo');
   const hospitales = ruta.startsWith('/admin/hospitales');
-  const titulo = hospitales ? (ruta.endsWith('/editar') ? 'Editar hospital' : crear ? 'Registrar hospital' : 'Hospitales') : editar ? 'Editar cuenta' : crear ? 'Crear cuenta' : 'Cuentas';
+  const servicios = ruta.startsWith('/admin/servicios');
+  const titulo = servicios ? (editar ? 'Editar servicio medico' : crear ? 'Registrar servicio medico' : 'Servicios medicos') : hospitales ? (ruta.endsWith('/editar') ? 'Editar hospital' : crear ? 'Registrar hospital' : 'Hospitales') : editar ? 'Editar cuenta' : crear ? 'Crear cuenta' : 'Cuentas';
 
   return (
     <div className="admin-shell">
       <aside className="admin-sidebar">
         <div className="admin-brand"><span className="admin-brand-mark">+</span><span>ESSAID</span></div>
         <p className="nav-caption">ADMINISTRACION</p>
-        <button className={`nav-item ${servicios ? 'active' : ''}`} onClick={() => navegar('/admin/servicios')}><span>✚</span> Servicios medicos</button>
         <button className={`nav-item ${ruta.startsWith('/admin/cuentas') ? 'active' : ''}`} onClick={() => navegar('/admin/cuentas')}><span>▦</span> Cuentas de usuario</button>
         <button className={`nav-item ${hospitales ? 'active' : ''}`} onClick={() => navegar('/admin/hospitales')}><span>＋</span> Hospitales</button>
+        <button className={`nav-item ${servicios ? 'active' : ''}`} onClick={() => navegar('/admin/servicios')}><span>✚</span> Servicios medicos</button>
         <div className="sidebar-bottom"><div className="admin-avatar">AD</div><div><strong>Superusuario</strong><small>{administrador}</small></div><button className="logout-button" onClick={onLogout} aria-label="Cerrar sesion" title="Cerrar sesion"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7" /></svg></button></div>
       </aside>
       <main className="admin-main">

@@ -27,4 +27,5 @@ urlpatterns = [
     path('api/admin/cuentas/', views.administrar_cuentas, name='api-admin-cuentas'),
     path('api/admin/cuentas/<int:cuenta_id>/', views.administrar_cuenta, name='api-admin-cuenta'),
     path('api/admin/hospitales/', include('hospitales.urls')),
+    path('api/admin/servicios/', include('servicios.urls')),
 ]

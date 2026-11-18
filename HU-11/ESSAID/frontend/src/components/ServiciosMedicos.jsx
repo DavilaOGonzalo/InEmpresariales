@@ -1,40 +1,46 @@
 import React from 'react';
 
-export default function ServiciosMedicos({ servicios, navegar, mensaje }) {
+export default function ServiciosMedicos({ servicios, asignaciones, navegar, mensaje }) {
   return (
     <section className="admin-content">
       <div className="page-heading">
         <div>
-          <p className="eyebrow">GESTION DE SERVICIOS</p>
+          <p className="eyebrow">CATALOGO DE SERVICIOS</p>
           <h1>Servicios medicos</h1>
-          <p className="heading-copy">Administra los servicios ofrecidos por cada hospital.</p>
+          <p className="heading-copy">Administra el catalogo y asigna sus servicios a hospitales.</p>
         </div>
-        <button className="primary-button add-button" onClick={() => navegar('/admin/servicios/nuevo')}>
-          <span>＋</span> Registrar servicio
-        </button>
+        <div className="page-actions">
+          <button className="secondary-button" onClick={() => navegar('/admin/servicios/asignados')}>Ver asignaciones</button>
+          <button className="primary-button add-button" onClick={() => navegar('/admin/servicios/nuevo')}><span>＋</span> Nuevo servicio</button>
+        </div>
       </div>
       {mensaje && <p className="success-message" role="status" aria-live="polite">{mensaje}</p>}
       <section className="table-card">
         <div className="table-heading">
-          <div><h2>Servicios registrados</h2><p>{servicios.length} servicios medicos en el sistema.</p></div>
+          <div><h2>Catalogo disponible</h2><p>{servicios.length} servicios en el catalogo.</p></div>
         </div>
         <div className="table-scroll">
           <table>
-            <thead><tr><th>SERVICIO</th><th>HOSPITAL</th><th>DESCRIPCION</th><th>ACCIONES</th></tr></thead>
+            <thead><tr><th>CODIGO</th><th>SERVICIO</th><th>DESCRIPCION</th><th>HOSPITALES</th><th>ACCIONES</th></tr></thead>
             <tbody>
-              {servicios.map((servicio) => (
-                <tr key={servicio.id}>
-                  <td><strong>{servicio.nombre}</strong></td>
-                  <td>{servicio.hospital_nombre}</td>
-                  <td>{servicio.descripcion || 'Sin descripcion'}</td>
-                  <td><div className="row-actions"><button onClick={() => navegar(`/admin/servicios/${servicio.id}/editar`)}>Editar</button></div></td>
-                </tr>
-              ))}
-              {servicios.length === 0 && <tr><td className="empty-row" colSpan="4">Todavia no hay servicios medicos registrados.</td></tr>}
+              {servicios.map((servicio) => {
+                const totalAsignaciones = asignaciones.filter((item) => item.servicio_id === servicio.id).length;
+                return (
+                  <tr key={servicio.id}>
+                    <td>Servicio {servicio.numero}</td>
+                    <td><strong>{servicio.nombre}</strong></td>
+                    <td className="service-description-cell">
+                      <p title={servicio.descripcion || 'Sin descripcion'}>{servicio.descripcion || 'Sin descripcion'}</p>
+                    </td>
+                    <td>{totalAsignaciones}</td>
+                    <td><div className="row-actions"><button onClick={() => navegar(`/admin/servicios/${servicio.id}`)}>Ver</button><button onClick={() => navegar(`/admin/servicios/${servicio.id}/editar`)}>Editar</button><button onClick={() => navegar(`/admin/servicios/asignar?servicio=${servicio.id}`)}>Asignar</button></div></td>
+                  </tr>
+                );
+              })}
+              {servicios.length === 0 && <tr><td className="empty-row" colSpan="5">El catalogo no tiene servicios.</td></tr>}
             </tbody>
           </table>
         </div>
-        <div className="table-footer">Mostrando {servicios.length} servicios medicos</div>
       </section>
     </section>
   );
