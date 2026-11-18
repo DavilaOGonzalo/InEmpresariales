@@ -8,16 +8,19 @@ import LoginAdmin from './components/LoginAdmin.jsx';
 import Hospitales from './components/Hospitales.jsx';
 import HospitalForm from './components/HospitalForm.jsx';
 import HospitalDetalle from './components/HospitalDetalle.jsx';
+import ServiciosMedicos from './components/ServiciosMedicos.jsx';
 import { useRuta } from './useRuta.js';
 
 const RUTA_CUENTAS = '/api/admin/cuentas/';
 const RUTA_HOSPITALES = '/api/admin/hospitales/';
+const RUTA_SERVICIOS = RUTA_HOSPITALES + 'servicios/';
 
 export default function App() {
   const [ruta, navegar] = useRuta();
   const [administrador, setAdministrador] = useState('');
   const [cuentas, setCuentas] = useState([]);
   const [hospitales, setHospitales] = useState([]);
+  const [servicios, setServicios] = useState([]);
   const [totalCuentas, setTotalCuentas] = useState(0);
   const [cargando, setCargando] = useState(true);
   const [procesando, setProcesando] = useState(false);
@@ -25,6 +28,7 @@ export default function App() {
   const [errorFormulario, setErrorFormulario] = useState('');
   const [errorHospital, setErrorHospital] = useState('');
   const [mensajeHospital, setMensajeHospital] = useState('');
+  const [mensajeServicio, setMensajeServicio] = useState('');
   const [mensajeExito, setMensajeExito] = useState('');
 
   async function cargarCuentas() {
@@ -36,6 +40,11 @@ export default function App() {
   async function cargarHospitales() {
     const resultado = await api(RUTA_HOSPITALES);
     setHospitales(resultado.hospitales);
+  }
+
+  async function cargarServicios() {
+    const resultado = await api(RUTA_SERVICIOS);
+    setServicios(resultado.servicios);
   }
 
   useEffect(() => {
@@ -70,7 +79,7 @@ export default function App() {
         body: JSON.stringify(credenciales),
       });
       setAdministrador(sesion.usuario);
-      await Promise.all([cargarCuentas(), cargarHospitales()]);
+      await Promise.all([cargarCuentas(), cargarHospitales(), cargarServicios()]);
       navegar('/admin/cuentas', true);
     } catch (error) {
       setErrorLogin(error.message);
@@ -86,6 +95,7 @@ export default function App() {
       setAdministrador('');
       setCuentas([]);
       setHospitales([]);
+      setServicios([]);
       setTotalCuentas(0);
       navegar('/admin/login', true);
     } catch (error) {
@@ -201,6 +211,8 @@ export default function App() {
       : <section className="admin-content"><p className="form-error">No se encontro ese hospital.</p><button className="secondary-button" onClick={() => navegar('/admin/hospitales')}>Volver a hospitales</button></section>;
   } else if (pagina === '/admin/hospitales') {
     contenido = <Hospitales hospitales={hospitales} navegar={navegar} mensaje={mensajeHospital} />;
+  } else if (pagina === '/admin/servicios') {
+    contenido = <ServiciosMedicos servicios={servicios} navegar={navegar} mensaje={mensajeServicio} />;
   } else if (pagina === '/admin/cuentas/nueva') {
     contenido = <CuentaForm onSave={guardarCuenta} onCancel={() => navegar(rutaLista)} error={errorFormulario} procesando={procesando} />;
   } else if (editar) {
