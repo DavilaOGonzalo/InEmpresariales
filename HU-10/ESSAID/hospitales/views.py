@@ -58,3 +58,45 @@ def administrar_hospitales(request):
         'id': hospital.id, 'nombre': hospital.nombre,
         'direccion': hospital.direccion, 'contacto': hospital.contacto,
     }}, status=201)
+
+def _hospital_json(hospital):
+    return {
+        'id': hospital.id,
+        'nombre': hospital.nombre,
+        'direccion': hospital.direccion,
+        'contacto': hospital.contacto,
+    }
+
+
+@require_http_methods(['GET', 'PATCH'])
+@_admin_required
+def administrar_hospital(request, hospital_id):
+    try:
+        hospital = Hospital.objects.get(pk=hospital_id)
+    except Hospital.DoesNotExist:
+        return JsonResponse({'error': 'No se encontro ese hospital.'}, status=404)
+
+    if request.method == 'GET':
+        return JsonResponse({'hospital': _hospital_json(hospital)})
+
+    datos = _json_body(request)
+    if datos is None:
+        return JsonResponse({'error': 'Envia los datos en formato JSON valido.'}, status=400)
+
+    valores = [datos.get(campo) for campo in ('nombre', 'direccion', 'contacto')]
+    if any(not isinstance(valor, str) or not valor.strip() for valor in valores):
+        return JsonResponse({'error': 'Completa el nombre, la direccion y el contacto.'}, status=400)
+    nombre, direccion, contacto = (valor.strip() for valor in valores)
+    if len(nombre) > 150 or len(direccion) > 255 or len(contacto) > 100:
+        return JsonResponse({'error': 'El nombre admite 150 caracteres, la direccion 255 y el contacto 100.'}, status=400)
+    if Hospital.objects.filter(nombre__iexact=nombre).exclude(pk=hospital.pk).exists():
+        return JsonResponse({'error': 'Ya existe otro hospital con ese nombre.'}, status=409)
+
+    hospital.nombre = nombre
+    hospital.direccion = direccion
+    hospital.contacto = contacto
+    try:
+        hospital.save(update_fields=['nombre', 'direccion', 'contacto'])
+    except IntegrityError:
+        return JsonResponse({'error': 'Ya existe otro hospital con ese nombre.'}, status=409)
+    return JsonResponse({'hospital': _hospital_json(hospital)})
