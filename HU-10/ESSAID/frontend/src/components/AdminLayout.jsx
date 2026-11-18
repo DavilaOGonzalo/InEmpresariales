@@ -4,7 +4,7 @@ export default function AdminLayout({ administrador, ruta, navegar, onLogout, ch
   const editar = ruta.includes('/editar');
   const crear = ruta.endsWith('/nueva') || ruta.endsWith('/nuevo');
   const hospitales = ruta.startsWith('/admin/hospitales');
-  const titulo = hospitales ? (crear ? 'Registrar hospital' : 'Hospitales') : editar ? 'Editar cuenta' : crear ? 'Crear cuenta' : 'Cuentas';
+  const titulo = hospitales ? (ruta.endsWith('/editar') ? 'Editar hospital' : crear ? 'Registrar hospital' : 'Hospitales') : editar ? 'Editar cuenta' : crear ? 'Crear cuenta' : 'Cuentas';
 
   return (
     <div className="admin-shell">

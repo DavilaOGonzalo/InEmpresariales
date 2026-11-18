@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Hospitales({ hospitales, navegar }) {
+export default function Hospitales({ hospitales, navegar, mensaje }) {
   return (
     <section className="admin-content">
       <div className="page-heading">
@@ -13,6 +13,7 @@ export default function Hospitales({ hospitales, navegar }) {
           <span>＋</span> Registrar hospital
         </button>
       </div>
+      {mensaje && <p className="success-message" role="status" aria-live="polite">{mensaje}</p>}
       <section className="table-card">
         <div className="table-heading">
           <div><h2>Hospitales registrados</h2><p>{hospitales.length} hospitales en el sistema.</p></div>
@@ -25,7 +26,7 @@ export default function Hospitales({ hospitales, navegar }) {
                 <tr key={hospital.id}>
                   <td><strong>{hospital.nombre}</strong></td>
                   <td>{hospital.direccion}</td>
-                  <td>{hospital.contacto}</td><td><div className="row-actions"><button onClick={() => navegar(`/admin/hospitales/${hospital.id}`)}>Ver</button></div></td>
+                  <td>{hospital.contacto}</td><td><div className="row-actions"><button onClick={() => navegar(`/admin/hospitales/${hospital.id}`)}>Ver</button><button onClick={() => navegar(`/admin/hospitales/${hospital.id}/editar`)}>Editar</button></div></td>
                 </tr>
               ))}
               {hospitales.length === 0 && <tr><td className="empty-row" colSpan="4">Todavia no hay hospitales registrados.</td></tr>}

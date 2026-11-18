@@ -9,7 +9,7 @@ export default function HospitalDetalle({ hospital, navegar, mensaje = '' }) {
           <h1>{hospital.nombre}</h1>
           <p className="heading-copy">Informacion registrada del hospital seleccionado.</p>
         </div>
-        <button className="primary-button add-button" onClick={() => navegar(`/admin/hospitales/${hospital.id}/editar`)}>Editar hospital</button>
+
       </div>
       {mensaje && <p className="success-message" role="status">{mensaje}</p>}
       <section className="account-form-card doctor-detail">

@@ -24,6 +24,7 @@ export default function App() {
   const [errorLogin, setErrorLogin] = useState('');
   const [errorFormulario, setErrorFormulario] = useState('');
   const [errorHospital, setErrorHospital] = useState('');
+  const [mensajeHospital, setMensajeHospital] = useState('');
   const [mensajeExito, setMensajeExito] = useState('');
 
   async function cargarCuentas() {
@@ -121,16 +122,25 @@ export default function App() {
   }
 
   async function guardarHospital(datos) {
+    const editarHospital = new URL(ruta, window.location.origin).pathname.match(/^\/admin\/hospitales\/(\d+)\/editar\/?$/);
     setProcesando(true);
     setErrorHospital('');
+    setMensajeHospital('');
     try {
-      const resultado = await api(RUTA_HOSPITALES, {
-        method: 'POST',
+      const endpoint = editarHospital ? `${RUTA_HOSPITALES}${editarHospital[1]}/` : RUTA_HOSPITALES;
+      const resultado = await api(endpoint, {
+        method: editarHospital ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(datos),
       });
-      setHospitales((actuales) => [...actuales, resultado.hospital].sort((a, b) => a.nombre.localeCompare(b.nombre)));
-      navegar('/admin/hospitales');
+      if (editarHospital) {
+        setHospitales((actuales) => actuales.map((hospital) => hospital.id === Number(editarHospital[1]) ? resultado.hospital : hospital).sort((a, b) => a.nombre.localeCompare(b.nombre)));
+        setMensajeHospital(`Se guardaron los cambios del hospital ${resultado.hospital.nombre}.`);
+        navegar('/admin/hospitales');
+      } else {
+        setHospitales((actuales) => [...actuales, resultado.hospital].sort((a, b) => a.nombre.localeCompare(b.nombre)));
+        navegar('/admin/hospitales');
+      }
     } catch (error) {
       setErrorHospital(error.message);
     } finally {
@@ -177,14 +187,20 @@ export default function App() {
   let contenido;
   if (pagina === '/admin/hospitales/nuevo') {
     contenido = <HospitalForm onSave={guardarHospital} onCancel={() => navegar('/admin/hospitales')} error={errorHospital} procesando={procesando} />;
+  } else if (pagina.match(/^\/admin\/hospitales\/(\d+)\/editar$/)) {
+    const hospitalId = Number(pagina.split('/')[3]);
+    const hospital = hospitales.find((item) => item.id === hospitalId);
+    contenido = hospital
+      ? <HospitalForm key={hospital.id} hospital={hospital} onSave={guardarHospital} onCancel={() => navegar('/admin/hospitales')} error={errorHospital} procesando={procesando} />
+      : <section className="admin-content"><p className="form-error">No se encontro ese hospital.</p><button className="secondary-button" onClick={() => navegar('/admin/hospitales')}>Volver a hospitales</button></section>;
   } else if (pagina.match(/^\/admin\/hospitales\/\d+$/)) {
     const hospitalId = Number(pagina.split('/')[3]);
     const hospital = hospitales.find((item) => item.id === hospitalId);
     contenido = hospital
-      ? <HospitalDetalle hospital={hospital} navegar={navegar} />
+      ? <HospitalDetalle hospital={hospital} navegar={navegar} mensaje={mensajeHospital} />
       : <section className="admin-content"><p className="form-error">No se encontro ese hospital.</p><button className="secondary-button" onClick={() => navegar('/admin/hospitales')}>Volver a hospitales</button></section>;
   } else if (pagina === '/admin/hospitales') {
-    contenido = <Hospitales hospitales={hospitales} navegar={navegar} />;
+    contenido = <Hospitales hospitales={hospitales} navegar={navegar} mensaje={mensajeHospital} />;
   } else if (pagina === '/admin/cuentas/nueva') {
     contenido = <CuentaForm onSave={guardarCuenta} onCancel={() => navegar(rutaLista)} error={errorFormulario} procesando={procesando} />;
   } else if (editar) {
