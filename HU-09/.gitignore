@@ -1,0 +1,6 @@
+env/
+.venv/
+ESSAID/db.sqlite3
+ESSAID/**/__pycache__/
+ESSAID/**/*.py[cod]
+ESSAID/frontend/node_modules/
