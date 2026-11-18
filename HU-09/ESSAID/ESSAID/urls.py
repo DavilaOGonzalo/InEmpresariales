@@ -26,4 +26,5 @@ urlpatterns = [
     path('api/auth/logout/', views.cerrar_sesion_admin, name='api-admin-logout'),
     path('api/admin/cuentas/', views.administrar_cuentas, name='api-admin-cuentas'),
     path('api/admin/cuentas/<int:cuenta_id>/', views.administrar_cuenta, name='api-admin-cuenta'),
+    path('api/admin/hospitales/', views.administrar_hospitales, name='api-admin-hospitales'),
 ]
