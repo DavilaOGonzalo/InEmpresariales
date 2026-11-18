@@ -15,7 +15,7 @@ from django.utils.dateparse import parse_date
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
-from .models import Hospital, Medico, Paciente, Usuario
+from .models import Medico, Paciente, Usuario
 
 
 PERMISOS_POR_ROL = {
@@ -450,38 +450,3 @@ def administrar_cuenta(request, cuenta_id):
         return JsonResponse({'error': 'No se pudieron guardar los cambios: revisa el correo o el DNI.'}, status=409)
 
     return JsonResponse({'cuenta': _perfil_json(perfil)})
-
-
-@require_http_methods(['GET', 'POST'])
-@_superusuario_requerido
-def administrar_hospitales(request):
-    if request.method == 'GET':
-        hospitales = Hospital.objects.all()
-        return JsonResponse({'hospitales': [
-            {'id': hospital.id, 'nombre': hospital.nombre,
-             'direccion': hospital.direccion, 'contacto': hospital.contacto}
-            for hospital in hospitales
-        ]})
-
-    datos = _json_body(request)
-    if datos is None:
-        return _error_json()
-
-    nombre = str(datos.get('nombre', '')).strip()
-    direccion = str(datos.get('direccion', '')).strip()
-    contacto = str(datos.get('contacto', '')).strip()
-    if not nombre or not direccion or not contacto:
-        return JsonResponse({'error': 'Completa el nombre, la direccion y el contacto.'}, status=400)
-    if len(nombre) > 150 or len(direccion) > 255 or len(contacto) > 100:
-        return JsonResponse({'error': 'El nombre admite 150 caracteres, la direccion 255 y el contacto 100.'}, status=400)
-    if Hospital.objects.filter(nombre__iexact=nombre).exists():
-        return JsonResponse({'error': 'Ya existe un hospital con ese nombre.'}, status=409)
-
-    try:
-        hospital = Hospital.objects.create(nombre=nombre, direccion=direccion, contacto=contacto)
-    except IntegrityError:
-        return JsonResponse({'error': 'Ya existe un hospital con ese nombre.'}, status=409)
-    return JsonResponse({'hospital': {
-        'id': hospital.id, 'nombre': hospital.nombre,
-        'direccion': hospital.direccion, 'contacto': hospital.contacto,
-    }}, status=201)

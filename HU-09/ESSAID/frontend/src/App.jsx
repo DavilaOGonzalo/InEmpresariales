@@ -5,25 +5,35 @@ import CuentaForm from './components/CuentaForm.jsx';
 import Cuentas from './components/Cuentas.jsx';
 import DetalleCuenta from './components/DetalleCuenta.jsx';
 import LoginAdmin from './components/LoginAdmin.jsx';
+import Hospitales from './components/Hospitales.jsx';
+import HospitalForm from './components/HospitalForm.jsx';
 import { useRuta } from './useRuta.js';
 
 const RUTA_CUENTAS = '/api/admin/cuentas/';
+const RUTA_HOSPITALES = '/api/admin/hospitales/';
 
 export default function App() {
   const [ruta, navegar] = useRuta();
   const [administrador, setAdministrador] = useState('');
   const [cuentas, setCuentas] = useState([]);
+  const [hospitales, setHospitales] = useState([]);
   const [totalCuentas, setTotalCuentas] = useState(0);
   const [cargando, setCargando] = useState(true);
   const [procesando, setProcesando] = useState(false);
   const [errorLogin, setErrorLogin] = useState('');
   const [errorFormulario, setErrorFormulario] = useState('');
+  const [errorHospital, setErrorHospital] = useState('');
   const [mensajeExito, setMensajeExito] = useState('');
 
   async function cargarCuentas() {
     const resultado = await api(RUTA_CUENTAS);
     setCuentas(resultado.cuentas);
     setTotalCuentas(resultado.total);
+  }
+
+  async function cargarHospitales() {
+    const resultado = await api(RUTA_HOSPITALES);
+    setHospitales(resultado.hospitales);
   }
 
   useEffect(() => {
@@ -58,7 +68,7 @@ export default function App() {
         body: JSON.stringify(credenciales),
       });
       setAdministrador(sesion.usuario);
-      await cargarCuentas();
+      await Promise.all([cargarCuentas(), cargarHospitales()]);
       navegar('/admin/cuentas', true);
     } catch (error) {
       setErrorLogin(error.message);
@@ -73,6 +83,7 @@ export default function App() {
       await api('/api/auth/logout/', { method: 'POST' });
       setAdministrador('');
       setCuentas([]);
+      setHospitales([]);
       setTotalCuentas(0);
       navegar('/admin/login', true);
     } catch (error) {
@@ -108,6 +119,23 @@ export default function App() {
     }
   }
 
+  async function guardarHospital(datos) {
+    setProcesando(true);
+    setErrorHospital('');
+    try {
+      const resultado = await api(RUTA_HOSPITALES, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(datos),
+      });
+      setHospitales((actuales) => [...actuales, resultado.hospital].sort((a, b) => a.nombre.localeCompare(b.nombre)));
+      navegar('/admin/hospitales');
+    } catch (error) {
+      setErrorHospital(error.message);
+    } finally {
+      setProcesando(false);
+    }
+  }
   async function eliminarCuenta(cuenta) {
     if (!window.confirm(`Eliminar la cuenta de ${cuenta.nombre} ${cuenta.apellido}?`)) return;
     setProcesando(true);
@@ -146,7 +174,11 @@ export default function App() {
   const editar = pagina.match(/^\/admin\/cuentas\/(\d+)\/editar$/);
   const verCuenta = pagina.match(/^\/admin\/cuentas\/(\d+)$/);
   let contenido;
-  if (pagina === '/admin/cuentas/nueva') {
+  if (pagina === '/admin/hospitales/nuevo') {
+    contenido = <HospitalForm onSave={guardarHospital} onCancel={() => navegar('/admin/hospitales')} error={errorHospital} procesando={procesando} />;
+  } else if (pagina === '/admin/hospitales') {
+    contenido = <Hospitales hospitales={hospitales} navegar={navegar} />;
+  } else if (pagina === '/admin/cuentas/nueva') {
     contenido = <CuentaForm onSave={guardarCuenta} onCancel={() => navegar(rutaLista)} error={errorFormulario} procesando={procesando} />;
   } else if (editar) {
     const cuenta = cuentas.find((item) => item.id === Number(editar[1]));

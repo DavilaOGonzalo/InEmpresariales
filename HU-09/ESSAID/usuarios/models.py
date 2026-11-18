@@ -94,21 +94,3 @@ class Paciente(models.Model):
 
     def __str__(self):
         return f'Paciente: {self.usuario}'
-
-
-class Hospital(models.Model):
-    nombre = models.CharField(max_length=150)
-    direccion = models.CharField(max_length=255)
-    contacto = models.CharField(max_length=100)
-
-    class Meta:
-        ordering = ['nombre']
-        constraints = [
-            models.UniqueConstraint(
-                models.functions.Lower('nombre'),
-                name='uniq_hospital_nombre_ci',
-            ),
-        ]
-
-    def __str__(self):
-        return self.nombre
