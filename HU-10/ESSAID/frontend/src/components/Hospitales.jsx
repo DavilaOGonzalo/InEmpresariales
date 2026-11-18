@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 
 export default function Hospitales({ hospitales, navegar }) {
   return (
@@ -19,16 +19,16 @@ export default function Hospitales({ hospitales, navegar }) {
         </div>
         <div className="table-scroll">
           <table>
-            <thead><tr><th>NOMBRE</th><th>DIRECCION</th><th>CONTACTO</th></tr></thead>
+            <thead><tr><th>NOMBRE</th><th>DIRECCION</th><th>CONTACTO</th><th>ACCIONES</th></tr></thead>
             <tbody>
               {hospitales.map((hospital) => (
                 <tr key={hospital.id}>
                   <td><strong>{hospital.nombre}</strong></td>
                   <td>{hospital.direccion}</td>
-                  <td>{hospital.contacto}</td>
+                  <td>{hospital.contacto}</td><td><div className="row-actions"><button onClick={() => navegar(`/admin/hospitales/${hospital.id}`)}>Ver</button></div></td>
                 </tr>
               ))}
-              {hospitales.length === 0 && <tr><td className="empty-row" colSpan="3">Todavia no hay hospitales registrados.</td></tr>}
+              {hospitales.length === 0 && <tr><td className="empty-row" colSpan="4">Todavia no hay hospitales registrados.</td></tr>}
             </tbody>
           </table>
         </div>

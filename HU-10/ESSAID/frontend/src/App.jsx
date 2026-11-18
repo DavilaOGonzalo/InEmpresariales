@@ -7,6 +7,7 @@ import DetalleCuenta from './components/DetalleCuenta.jsx';
 import LoginAdmin from './components/LoginAdmin.jsx';
 import Hospitales from './components/Hospitales.jsx';
 import HospitalForm from './components/HospitalForm.jsx';
+import HospitalDetalle from './components/HospitalDetalle.jsx';
 import { useRuta } from './useRuta.js';
 
 const RUTA_CUENTAS = '/api/admin/cuentas/';
@@ -176,6 +177,12 @@ export default function App() {
   let contenido;
   if (pagina === '/admin/hospitales/nuevo') {
     contenido = <HospitalForm onSave={guardarHospital} onCancel={() => navegar('/admin/hospitales')} error={errorHospital} procesando={procesando} />;
+  } else if (pagina.match(/^\/admin\/hospitales\/\d+$/)) {
+    const hospitalId = Number(pagina.split('/')[3]);
+    const hospital = hospitales.find((item) => item.id === hospitalId);
+    contenido = hospital
+      ? <HospitalDetalle hospital={hospital} navegar={navegar} />
+      : <section className="admin-content"><p className="form-error">No se encontro ese hospital.</p><button className="secondary-button" onClick={() => navegar('/admin/hospitales')}>Volver a hospitales</button></section>;
   } else if (pagina === '/admin/hospitales') {
     contenido = <Hospitales hospitales={hospitales} navegar={navegar} />;
   } else if (pagina === '/admin/cuentas/nueva') {
