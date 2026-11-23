@@ -30,5 +30,6 @@ urlpatterns = [
     # El router gestiona la barra inicial de sus rutas de lista y detalle.
     path('api/admin/hospitales', include('hospitales.urls')),
     path('api/admin/servicios/', include('servicios.urls')),
+    path('api/admin/citas/', include('citas.urls')),
     path('api/disponibilidad/', consultar_disponibilidad, name='api-disponibilidad'),
 ]
