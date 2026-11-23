@@ -5,7 +5,8 @@ export default function AdminLayout({ administrador, ruta, navegar, onLogout, ch
   const crear = ruta.endsWith('/nueva') || ruta.endsWith('/nuevo');
   const hospitales = ruta.startsWith('/admin/hospitales');
   const servicios = ruta.startsWith('/admin/servicios');
-  const titulo = servicios ? (editar ? 'Editar servicio medico' : crear ? 'Registrar servicio medico' : 'Servicios medicos') : hospitales ? (ruta.endsWith('/editar') ? 'Editar hospital' : crear ? 'Registrar hospital' : 'Hospitales') : editar ? 'Editar cuenta' : crear ? 'Crear cuenta' : 'Cuentas';
+  const citas = ruta.startsWith('/admin/citas');
+  const titulo = citas ? 'Citas médicas' : servicios ? (editar ? 'Editar servicio medico' : crear ? 'Registrar servicio medico' : 'Servicios medicos') : hospitales ? (ruta.endsWith('/editar') ? 'Editar hospital' : crear ? 'Registrar hospital' : 'Hospitales') : editar ? 'Editar cuenta' : crear ? 'Crear cuenta' : 'Cuentas';
 
   return (
     <div className="admin-shell">
@@ -23,6 +24,10 @@ export default function AdminLayout({ administrador, ruta, navegar, onLogout, ch
         <button className={`nav-item ${servicios ? 'active' : ''}`} onClick={() => navegar('/admin/servicios')}>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8a2 2 0 0 1 2 2v16H6V5a2 2 0 0 1 2-2Z" /><path d="M10 3V2h4v1m-2 5v8m-4-4h8" /></svg>
           Servicios medicos
+        </button>
+        <button className={`nav-item ${citas ? 'active' : ''}`} onClick={() => navegar('/admin/citas')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 3v4m10-4v4M3 10h18m-13 4h3m-3 3h7" /></svg>
+          Citas
         </button>
         <div className="sidebar-bottom"><div className="admin-avatar">AD</div><div><strong>Superusuario</strong><small>{administrador}</small></div><button className="logout-button" onClick={onLogout} aria-label="Cerrar sesion" title="Cerrar sesion"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7" /></svg></button></div>
       </aside>

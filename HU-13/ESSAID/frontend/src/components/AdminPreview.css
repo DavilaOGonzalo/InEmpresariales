@@ -184,3 +184,27 @@ td { padding: 13px 17px; border-top: 1px solid #eff2f5; color: #607184; font-siz
 .service-description-cell p { display: -webkit-box; max-width: 360px; margin: 0; overflow: hidden; color: inherit; line-height: 1.45; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
 .service-detail dl { grid-template-columns: 1fr; }
 .service-full-description dd { max-width: 780px; line-height: 1.7; font-weight: 400; overflow-wrap: anywhere; white-space: pre-wrap; }
+.cita-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.appointment-filter-card { margin-bottom: 20px; padding: 20px 22px; border: 1px solid #e7edf1; border-radius: 11px; background: #fff; }
+.appointment-filter-heading h2 { margin: 0; color: #263d52; font-size: 14px; }
+.appointment-filter-heading p { margin: 5px 0 18px; color: #8a97a5; font-size: 11px; }
+.appointment-filter-fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.appointment-filter-fields label { display: grid; gap: 7px; color: #344a60; font-size: 11px; font-weight: 700; }
+.appointment-filter-fields input, .appointment-filter-fields select { width: 100%; height: 39px; padding: 0 11px; border: 1px solid #dce4eb; border-radius: 7px; outline: none; color: #34495e; background: #fff; font: inherit; font-size: 11px; }
+.appointment-filter-fields input:focus, .appointment-filter-fields select:focus { border-color: #218e86; box-shadow: 0 0 0 3px #16847d1c; }
+.appointment-filter-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 16px; }
+.appointment-filter-actions button { min-height: 38px; }
+.appointment-table-card { margin-bottom: 20px; }
+.appointment-status { display: inline-flex; align-items: center; padding: 5px 9px; border-radius: 20px; color: #886d32; background: #fff6df; font-size: 10px; font-weight: 700; }
+.appointment-status-confirmada { color: #24764d; background: #e8f6ec; }
+.appointment-status-completada { color: #3d6897; background: #eaf2fb; }
+.appointment-status-cancelada { color: #a33d43; background: #fff0f0; }
+
+@media (max-width: 900px) {
+  .appointment-filter-fields { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 650px) {
+  .cita-stat-grid { grid-template-columns: 1fr 1fr; }
+  .appointment-filter-card { padding: 18px 15px; }
+  .appointment-filter-fields { grid-template-columns: 1fr; }
+}

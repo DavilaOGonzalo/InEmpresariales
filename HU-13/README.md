@@ -1,11 +1,11 @@
-# HU-12: estado de hospitales y servicios
+# HU-13: consulta de citas
 
-Los hospitales y servicios nuevos se crean activos. El administrador puede consultar el estado en sus listas y activarlos o desactivarlos sin borrar sus datos ni sus asignaciones.
+El administrador puede consultar las citas registradas en la tabla `citas` y filtrarlas por fecha, médico o estado. La app `citas` utiliza el ORM de Django para leer esa tabla; el paciente y el médico se guardan como nombres en cada cita.
 
-Para aplicar las migraciones, desde `HU-12/ESSAID` ejecuta:
+Para crear la tabla, desde `HU-13/ESSAID` ejecuta:
 
 ```powershell
 python manage.py migrate
 ```
 
-La disponibilidad pública se consulta mediante `GET /api/disponibilidad/`. La respuesta incluye solo hospitales activos y, dentro de cada hospital, sus servicios activos asignados. Los selectores de asignación también excluyen los elementos inactivos y la API rechaza nuevas asignaciones que los incluyan.
+Las citas se pueden registrar desde el panel Django en `/admin/citas/cita/add/`. La consulta del frontend está disponible en el menú **Citas** y usa `GET /api/admin/citas/`, con filtros opcionales `fecha`, `medico` y `estado`.

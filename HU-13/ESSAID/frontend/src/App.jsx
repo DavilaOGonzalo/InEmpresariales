@@ -5,12 +5,14 @@ import LoginAdmin from './components/LoginAdmin.jsx';
 import HospitalesPage from './pages/HospitalesPage.jsx';
 import ServiciosPage from './pages/ServiciosPage.jsx';
 import CuentasPage from './pages/CuentasPage.jsx';
+import CitasPage from './pages/CitasPage.jsx';
 import { useRuta } from './useRuta.js';
 
 const RUTA_CUENTAS = '/api/admin/cuentas/';
 const RUTA_HOSPITALES = '/api/admin/hospitales/';
 const RUTA_SERVICIOS = '/api/admin/servicios/';
 const RUTA_ASIGNACIONES = RUTA_SERVICIOS + 'asignaciones/';
+const RUTA_CITAS = '/api/admin/citas/';
 
 export default function App() {
   const [ruta, navegar] = useRuta();
@@ -19,6 +21,10 @@ export default function App() {
   const [hospitales, setHospitales] = useState([]);
   const [servicios, setServicios] = useState([]);
   const [asignaciones, setAsignaciones] = useState([]);
+  const [citas, setCitas] = useState([]);
+  const [totalCitas, setTotalCitas] = useState(0);
+  const [cargandoCitas, setCargandoCitas] = useState(false);
+  const [errorCitas, setErrorCitas] = useState('');
   const [totalCuentas, setTotalCuentas] = useState(0);
   const [cargando, setCargando] = useState(true);
   const [procesando, setProcesando] = useState(false);
@@ -54,6 +60,26 @@ export default function App() {
     setAsignaciones(resultado.asignaciones);
   }
 
+  async function buscarCitas(filtros = {}) {
+    setCargandoCitas(true);
+    setErrorCitas('');
+    const parametros = new URLSearchParams();
+    Object.entries(filtros).forEach(([campo, valor]) => {
+      if (valor) parametros.set(campo, valor);
+    });
+    const consulta = parametros.toString();
+    try {
+      const resultado = await api(`${RUTA_CITAS}${consulta ? `?${consulta}` : ''}`);
+      setCitas(resultado.citas);
+      setTotalCitas(resultado.total_sistema);
+    } catch (error) {
+      setCitas([]);
+      setErrorCitas(error.message);
+    } finally {
+      setCargandoCitas(false);
+    }
+  }
+
   useEffect(() => {
     let activa = true;
     async function prepararInicio() {
@@ -81,6 +107,11 @@ export default function App() {
     const paginaActual = new URL(ruta, window.location.origin).pathname;
     const esHospitales = paginaActual.startsWith('/admin/hospitales');
     const esServicios = paginaActual.startsWith('/admin/servicios');
+    const esCitas = paginaActual.startsWith('/admin/citas');
+    if (esCitas) {
+      buscarCitas();
+      return;
+    }
     if (!esHospitales && !esServicios) return;
 
     setErrorCargaDatos('');
@@ -118,6 +149,8 @@ export default function App() {
       setHospitales([]);
       setServicios([]);
       setAsignaciones([]);
+      setCitas([]);
+      setTotalCitas(0);
       setTotalCuentas(0);
       navegar('/admin/login', true);
     } catch (error) {
@@ -307,12 +340,14 @@ export default function App() {
     hospitales, servicios, asignaciones, cuentas, totalCuentas,
     mensajeHospital, mensajeServicio, mensajeAsignacion, mensajeExito,
     errorHospital, errorServicio, errorAsignacion, errorFormulario,
+    citas, totalCitas, cargandoCitas, errorCitas, buscarCitas,
     guardarHospital, guardarServicio, guardarAsignacion, guardarCuenta,
     cambiarEstadoHospital, cambiarEstadoServicio, cambiarEstadoCuenta,
     eliminarCuenta,
   };
   if (pagina.startsWith('/admin/hospitales')) contenido = <HospitalesPage {...propsPagina} />;
   else if (pagina.startsWith('/admin/servicios')) contenido = <ServiciosPage {...propsPagina} />;
+  else if (pagina === '/admin/citas') contenido = <CitasPage citas={citas} totalCitas={totalCitas} cargando={cargandoCitas} error={errorCitas} onBuscar={buscarCitas} />;
   else if (pagina.startsWith('/admin/cuentas')) contenido = <CuentasPage {...propsPagina} />;
   if (!contenido) contenido = <section className="admin-content"><h1>Pagina no encontrada</h1><button className="secondary-button" onClick={() => navegar('/admin/cuentas')}>Volver a las cuentas</button></section>;
 
