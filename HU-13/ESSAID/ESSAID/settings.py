@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'usuarios',
     'hospitales.apps.HospitalesConfig',
     'servicios.apps.ServiciosConfig',
+    'citas.apps.CitasConfig',
 ]
 
 
