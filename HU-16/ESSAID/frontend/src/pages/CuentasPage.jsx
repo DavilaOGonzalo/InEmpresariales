@@ -1,3 +1,4 @@
+import React from 'react';
 import CuentaForm from '../components/CuentaForm.jsx';
 import Cuentas from '../components/Cuentas.jsx';
 import DetalleCuenta from '../components/DetalleCuenta.jsx';

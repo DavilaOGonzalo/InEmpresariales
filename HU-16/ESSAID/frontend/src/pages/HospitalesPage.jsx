@@ -1,3 +1,4 @@
+import React from 'react';
 import Hospitales from '../components/Hospitales.jsx';
 import HospitalForm from '../components/HospitalForm.jsx';
 import HospitalDetalle from '../components/HospitalDetalle.jsx';

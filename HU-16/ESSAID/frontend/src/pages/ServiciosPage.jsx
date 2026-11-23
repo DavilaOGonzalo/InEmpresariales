@@ -1,3 +1,4 @@
+import React from 'react';
 import ServiciosMedicos from '../components/ServiciosMedicos.jsx';
 import ServicioMedicoForm from '../components/ServicioMedicoForm.jsx';
 import AsignarServicioForm from '../components/AsignarServicioForm.jsx';
