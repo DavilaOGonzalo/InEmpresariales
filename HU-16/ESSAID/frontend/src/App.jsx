@@ -44,8 +44,11 @@ export default function App() {
 
   async function cargarCuentas() {
     const resultado = await api(RUTA_CUENTAS);
+    if (!Array.isArray(resultado.cuentas)) {
+      throw new Error('No se recibió una lista válida de cuentas. Intenta de nuevo.');
+    }
     setCuentas(resultado.cuentas);
-    setTotalCuentas(resultado.total);
+    setTotalCuentas(Number.isFinite(resultado.total) ? resultado.total : resultado.cuentas.length);
   }
 
   async function cargarHospitales() {
@@ -165,8 +168,11 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credenciales),
       });
-      setAdministrador(sesion.usuario);
+      if (typeof sesion.usuario !== 'string' || !sesion.usuario) {
+        throw new Error('El servidor no confirmó la sesión del administrador.');
+      }
       await cargarCuentas();
+      setAdministrador(sesion.usuario);
       navegar('/admin/cuentas', true);
     } catch (error) {
       setErrorLogin(error.message);
